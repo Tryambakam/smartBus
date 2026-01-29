@@ -1,0 +1,16 @@
+### Health
+GET http://localhost:3000/api/health
+
+### Send GPS update
+POST http://localhost:3000/api/gps/update
+Content-Type: application/json
+
+{
+  "busId": "BUS-101",
+  "lat": 30.7333,
+  "lng": 76.7794,
+  "speed": 30
+}
+
+### Get live buses
+GET http://localhost:3000/api/buses/live
