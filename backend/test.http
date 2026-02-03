@@ -14,3 +14,30 @@ Content-Type: application/json
 
 ### Get live buses
 GET http://localhost:3000/api/buses/live
+
+POST http://localhost:3000/api/admin/routes
+Content-Type: application/json
+
+{
+  "routeId": "R-12A",
+  "name": "Sector 17 to Mohali",
+  "city": "Chandigarh"
+}
+
+POST http://localhost:3000/api/admin/stops
+Content-Type: application/json
+
+{
+  "stopId": "S-001",
+  "routeId": "R-12A",
+  "name_en": "Sector 17",
+  "name_hi": "सेक्टर 17",
+  "name_pa": "ਸੈਕਟਰ 17",
+  "lat": 30.7390,
+  "lng": 76.7821,
+  "sequence": 1
+}
+
+GET http://localhost:3000/api/routes
+
+GET http://localhost:3000/api/routes/R-12A/stops

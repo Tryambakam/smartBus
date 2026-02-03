@@ -1,4 +1,7 @@
 // backend/src/index.js
+
+const routesRoutes = require("./routes/routes.routes");
+const adminRoutes = require("./routes/admin.routes");
 require("dotenv").config();
 
 const express = require("express");
@@ -12,6 +15,9 @@ const app = express();
 // Middlewares
 app.use(cors());
 app.use(express.json({ limit: "100kb" }));
+app.use("/api", routesRoutes);
+app.use("/api", adminRoutes);
+
 
 // ✅ Health check
 app.get("/api/health", (req, res) => {
