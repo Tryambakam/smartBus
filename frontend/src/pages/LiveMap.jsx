@@ -19,6 +19,9 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function LiveMap() {
+  const [busQuery, setBusQuery] = useState("");
+  const [selectedBusId, setSelectedBusId] = useState(null);
+
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
   const [selectedRouteId, setSelectedRouteId] = useState("");
@@ -102,6 +105,18 @@ export default function LiveMap() {
   return (
     <div className="gov-shell">
       <GovHeader lastSyncText={lastSyncText} backendOk={backendOk} />
+      <div
+        style={{
+          background: "#eef2ff",
+          borderBottom: "1px solid #c7d2fe",
+          padding: "8px 16px",
+          fontSize: 12,
+          color: "#1e3a8a",
+        }}
+>
+        ℹ️ This system displays live bus location data for public information purposes.
+        </div>
+
 
       <main className="gov-main">
         {/* Left panel */}
@@ -118,7 +133,10 @@ export default function LiveMap() {
               onChange={(e) => setSelectedRouteId(e.target.value)}
             >
               {routes.length === 0 ? (
-                <option value="">(No routes yet)</option>
+                <option value="">
+                  No routes configured by authority
+                </option>
+
               ) : (
                 routes.map((r) => (
                   <option key={r.routeId} value={r.routeId}>
@@ -160,6 +178,7 @@ export default function LiveMap() {
             <div className="label">Legend</div>
             <div className="muted">● Stops (blue circle) · 📍 Bus (marker)</div>
           </div>
+          
         </section>
 
         {/* Map */}
@@ -193,7 +212,10 @@ export default function LiveMap() {
 
               {/* Buses */}
               {visibleBuses.map((b) => (
-                <Marker key={b.busId} position={[b.lat, b.lng]}>
+                  <Marker
+                    key={b.busId}
+                    position={[b.lat, b.lng]}
+                    opacity={selectedBusId && b.busId !== selectedBusId ? 0.5 : 1}>
                   <Popup>
                     <div>
                       <div style={{ fontWeight: 800 }}>{b.busId}</div>
@@ -225,7 +247,13 @@ export default function LiveMap() {
           <div className="card-b">
             <div className="list">
               {visibleBuses.slice(0, 12).map((b) => (
-                <div key={b.busId} className="item">
+                <div
+                  key={b.busId}
+                  className="item"
+                  style={{
+                    borderColor: b.busId === selectedBusId ? "#0b4ea2" : undefined
+                  }}
+                  onClick={() => setSelectedBusId(b.busId)}>
                   <div>
                     <b>{b.busId}</b>
                     <div className="kv">Speed: {b.speed ?? 0}</div>
@@ -241,10 +269,9 @@ export default function LiveMap() {
 
               {visibleBuses.length === 0 && (
                 <div className="muted">
-                  No live buses available at the moment.
-                <br />
-                Please check back shortly.
-               </div>
+                 Auto-refresh every 5 seconds
+                </div>
+
               )}
 
             </div>
