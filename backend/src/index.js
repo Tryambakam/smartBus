@@ -2,6 +2,7 @@
 
 const routesRoutes = require("./routes/routes.routes");
 const adminRoutes = require("./routes/admin.routes");
+
 require("dotenv").config();
 
 const express = require("express");
@@ -9,8 +10,16 @@ const cors = require("cors");
 
 const connectDB = require("./db");
 const BusLatest = require("./models/BusLatest");
+const busRoutes = require("./routes/bus.routes");
+const etaRoutes = require("./routes/eta.routes");
+const gpsRoutes = require("./routes/gps.routes");
+
 
 const app = express();
+
+app.use("/api", busRoutes);
+app.use("/api", etaRoutes);
+app.use("/api", gpsRoutes);
 
 // Middlewares
 app.use(cors());

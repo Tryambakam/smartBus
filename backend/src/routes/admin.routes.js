@@ -1,43 +1,57 @@
 const express = require("express");
-const { z } = require("zod");
+const router = express.Router();
+
 const Route = require("../models/Route");
 const Stop = require("../models/Stop");
 
-const router = express.Router();
-
-const routeSchema = z.object({
-  routeId: z.string().min(1),
-  name: z.string().min(1),
-  city: z.string().optional(),
-});
-
-const stopSchema = z.object({
-  stopId: z.string().min(1),
-  routeId: z.string().min(1),
-  name_en: z.string().min(1),
-  name_hi: z.string().optional(),
-  name_pa: z.string().optional(),
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-  sequence: z.number().int().min(1),
-});
-
 // POST /api/admin/routes
 router.post("/admin/routes", async (req, res) => {
-  const parsed = routeSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  try {
+    const { routeId, name, city } = req.body;
 
-  const doc = await Route.create(parsed.data);
-  res.status(201).json(doc);
+    if (!routeId || !name) {
+      return res.status(400).json({ error: "routeId and name are required" });
+    }
+
+    const created = await Route.create({ routeId, name, city: city || "" });
+    res.status(201).json(created);
+  } catch (err) {
+    console.error("POST /admin/routes error:", err);
+    // handle duplicate routeId
+    if (err.code === 11000) return res.status(409).json({ error: "routeId already exists" });
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // POST /api/admin/stops
 router.post("/admin/stops", async (req, res) => {
-  const parsed = stopSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  try {
+    const { stopId, routeId, name_en, name_hi, name_pa, lat, lng, sequence } = req.body;
 
-  const doc = await Stop.create(parsed.data);
-  res.status(201).json(doc);
+    if (!stopId || !routeId || !name_en || lat == null || lng == null || sequence == null) {
+      return res.status(400).json({
+        error: "stopId, routeId, name_en, lat, lng, sequence are required",
+      });
+    }
+
+    const created = await Stop.create({
+      stopId,
+      routeId,
+      name_en,
+      name_hi: name_hi || "",
+      name_pa: name_pa || "",
+      lat,
+      lng,
+      sequence,
+    });
+
+    res.status(201).json(created);
+  } catch (err) {
+    console.error("POST /admin/stops error:", err);
+    // handle duplicate stopId
+    if (err.code === 11000) return res.status(409).json({ error: "stopId already exists" });
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

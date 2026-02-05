@@ -51,3 +51,98 @@ Content-Type: application/json
 GET http://localhost:3000/api/routes
 
 GET http://localhost:3000/api/routes/R-12A/stops
+
+### Health check
+GET http://localhost:3000/api/health
+
+###
+
+### Update GPS (with routeId)
+POST http://localhost:3000/api/gps/update
+Content-Type: application/json
+
+{
+  "busId": "BUS-101",
+  "routeId": "R-CHD-01",
+  "lat": 30.7333,
+  "lng": 76.7794,
+  "speed": 32
+}
+
+###
+
+### Get live buses
+GET http://localhost:3000/api/buses/live
+
+
+### GPS update (make sure routeId is included)
+POST http://localhost:3000/api/gps/update
+Content-Type: application/json
+
+{
+  "busId": "BUS-101",
+  "routeId": "R-CHD-01",
+  "lat": 30.7333,
+  "lng": 76.7794,
+  "speed": 30
+}
+
+###
+
+### ETA for bus
+GET http://localhost:3000/api/bus/BUS-101/eta
+
+
+### Create a route
+POST http://localhost:3000/api/admin/routes
+Content-Type: application/json
+
+{
+  "routeId": "R-CHD-01",
+  "name": "Sector 17 to Mohali",
+  "city": "Chandigarh"
+}
+
+###
+
+### Create stop 1
+POST http://localhost:3000/api/admin/stops
+Content-Type: application/json
+
+{
+  "stopId": "S-001",
+  "routeId": "R-CHD-01",
+  "name_en": "Sector 17",
+  "name_hi": "सेक्टर 17",
+  "name_pa": "ਸੈਕਟਰ 17",
+  "lat": 30.7390,
+  "lng": 76.7821,
+  "sequence": 1
+}
+
+###
+
+### Create stop 2
+POST http://localhost:3000/api/admin/stops
+Content-Type: application/json
+
+{
+  "stopId": "S-002",
+  "routeId": "R-CHD-01",
+  "name_en": "Sector 35",
+  "name_hi": "सेक्टर 35",
+  "name_pa": "ਸੈਕਟਰ 35",
+  "lat": 30.7265,
+  "lng": 76.7664,
+  "sequence": 2
+}
+
+###
+
+### Fetch routes (frontend dropdown uses this)
+GET http://localhost:3000/api/routes
+
+###
+
+### Fetch stops for a route (frontend uses this)
+GET http://localhost:3000/api/routes/R-CHD-01/stops
