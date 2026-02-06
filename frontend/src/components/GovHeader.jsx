@@ -5,7 +5,7 @@ export default function GovHeader({ lastSyncText, backendOk }) {
         <div className="gov-brand">
           <div className="gov-logo">SB</div>
           <div className="gov-title">
-            <div className="dept">Department of Transport, Punjab</div>
+            <div className="dept">Department of Transport</div>
             <div className="app">smartBus — Real-Time Public Transport Tracking</div>
           </div>
         </div>

@@ -93,7 +93,20 @@ Content-Type: application/json
 GET http://localhost:3000/api/bus/BUS-101/eta
 
 
-### Create a route
+
+
+###
+
+### Fetch routes (frontend dropdown uses this)
+GET http://localhost:3000/api/routes
+
+###
+
+### Fetch stops for a route (frontend uses this)
+GET http://localhost:3000/api/routes/R-CHD-01/stops
+
+
+### Create route
 POST http://localhost:3000/api/admin/routes
 Content-Type: application/json
 
@@ -139,10 +152,17 @@ Content-Type: application/json
 
 ###
 
-### Fetch routes (frontend dropdown uses this)
-GET http://localhost:3000/api/routes
+### Create stop 3
+POST http://localhost:3000/api/admin/stops
+Content-Type: application/json
 
-###
-
-### Fetch stops for a route (frontend uses this)
-GET http://localhost:3000/api/routes/R-CHD-01/stops
+{
+  "stopId": "S-003",
+  "routeId": "R-CHD-01",
+  "name_en": "Mohali Phase 7",
+  "name_hi": "मोहाली फेज 7",
+  "name_pa": "ਮੋਹਾਲੀ ਫੇਜ਼ 7",
+  "lat": 30.7046,
+  "lng": 76.7179,
+  "sequence": 3
+}

@@ -1,14 +1,16 @@
 const express = require("express");
+const router = express.Router();
 const BusLatest = require("../models/BusLatest");
 
-const router = express.Router();
-
-// GET /api/bus/:busId/latest
-router.get("/bus/:busId/latest", async (req, res) => {
-  const { busId } = req.params;
-  const doc = await BusLatest.findOne({ busId });
-  if (!doc) return res.status(404).json({ error: "Bus not found" });
-  res.json(doc);
+// GET /api/buses/live
+router.get("/buses/live", async (req, res) => {
+  try {
+    const buses = await BusLatest.find().sort({ timestamp: -1 }).limit(200);
+    res.json(buses);
+  } catch (err) {
+    console.error("❌ Live buses error:", err.message);
+    res.status(500).json({ ok: false, error: "DB read failed" });
+  }
 });
 
 module.exports = router;
