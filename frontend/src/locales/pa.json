@@ -1,0 +1,35 @@
+{
+  "app": {
+    "dept": "ਟਰਾਂਸਪੋਰਟ ਵਿਭਾਗ",
+    "name": "smartBus",
+    "tagline": "ਰੀਅਲ-ਟਾਈਮ ਪਬਲਿਕ ਟਰਾਂਸਪੋਰਟ ਟ੍ਰੈਕਿੰਗ",
+    "helpline": "ਹੈਲਪਲਾਈਨ",
+    "service": "ਸੇਵਾ",
+    "operational": "ਚਾਲੂ",
+    "down": "ਬੰਦ",
+    "lastSync": "ਆਖਰੀ ਸਿੰਕ",
+    "day": "ਦਿਨ",
+    "night": "ਰਾਤ",
+    "login": "ਲੌਗਿਨ"
+  },
+  "live": {
+    "controls": "ਕੰਟਰੋਲ",
+    "routeDisplay": "ਰੂਟ ਅਤੇ ਡਿਸਪਲੇ",
+    "selectRoute": "ਰੂਟ ਚੁਣੋ",
+    "liveMap": "ਲਾਈਵ ਮੈਪ",
+    "tracking": "ਲਾਈਵ ਟ੍ਰੈਕਿੰਗ",
+    "liveBuses": "ਲਾਈਵ ਬੱਸਾਂ",
+    "autoRefresh": "ਆਟੋ-ਰਿਫ੍ਰੈਸ਼",
+    "searchBus": "ਬੱਸ ID ਖੋਜੋ",
+    "stops": "ਸਟਾਪ",
+    "buses": "ਬੱਸਾਂ",
+    "syncing": "ਸਿੰਕ ਹੋ ਰਿਹਾ ਹੈ…",
+    "open": "ਖੋਲ੍ਹੋ",
+    "noBuses": "ਕੋਈ ਲਾਈਵ ਬੱਸ ਨਹੀਂ",
+    "sendGps": "ਬੱਸ ਵੇਖਣ ਲਈ GPS ਅੱਪਡੇਟ ਭੇਜੋ।"
+  },
+  "notice": {
+    "public": "ਜਨਤਕ ਸੁਚਨਾ",
+    "accuracy": "ਲਾਈਵ ਲੋਕੇਸ਼ਨ ਜਨਤਕ ਜਾਣਕਾਰੀ ਲਈ ਹੈ। GPS/ਨੈੱਟਵਰਕ ਅਨੁਸਾਰ ਸਹੀ ਹੋ ਸਕਦੀ ਹੈ।"
+  }
+}

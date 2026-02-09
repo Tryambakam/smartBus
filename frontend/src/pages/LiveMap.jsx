@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Popup, CircleMarker } from "react-leaflet";
@@ -52,6 +53,7 @@ export default function LiveMap() {
   const busMarkerRefs = useRef({});
 
   const [followBus, setFollowBus] = useState(false);
+  const { t } = useTranslation();
 
   // Load routes once
   useEffect(() => {
@@ -234,7 +236,7 @@ export default function LiveMap() {
   }
 
   return (
-    <div className="gov-shell">
+    <div className="gov-shell page-enter">
       <GovHeader lastSyncText={status} backendOk={backendOk} />
 
       <div className="gov-banner">

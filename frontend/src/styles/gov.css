@@ -681,3 +681,34 @@ select:focus, button:focus, input:focus{
 @media (prefers-reduced-motion: reduce){
   *{ animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
 }
+
+/* Small premium chip buttons */
+.chip{
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  margin: 0 4px;
+}
+.chip:hover{ background: rgba(255,255,255,0.18); }
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.page-enter{
+  animation: pageIn 220ms ease-out both;
+}
+@keyframes pageIn{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}

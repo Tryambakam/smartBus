@@ -1,0 +1,35 @@
+{
+  "app": {
+    "dept": "Department of Transportation",
+    "name": "smartBus",
+    "tagline": "Real-Time Public Transport Tracking",
+    "helpline": "Helpline",
+    "service": "Service",
+    "operational": "Operational",
+    "down": "Down",
+    "lastSync": "Last sync",
+    "day": "Day",
+    "night": "Night",
+    "login": "Login"
+  },
+  "live": {
+    "controls": "Controls",
+    "routeDisplay": "Route & display",
+    "selectRoute": "Select Route",
+    "liveMap": "Live Map",
+    "tracking": "Interactive tracking",
+    "liveBuses": "Live Buses",
+    "autoRefresh": "Auto-refresh",
+    "searchBus": "Search bus ID",
+    "stops": "Stops",
+    "buses": "Buses",
+    "syncing": "Syncing…",
+    "open": "Open",
+    "noBuses": "No live buses",
+    "sendGps": "Send GPS updates to see buses."
+  },
+  "notice": {
+    "public": "Public Notice",
+    "accuracy": "Live location is for public info. Accuracy may vary (GPS/network)."
+  }
+}
