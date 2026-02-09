@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import L from "leaflet";
 
 import GovHeader from "../components/GovHeader";
+import AlertsBar from "../components/AlertsBar";
 import BusMarker from "../components/BusMarker";
 import { getLiveBuses, getRoutes, getStops } from "../api";
 
@@ -21,7 +22,6 @@ L.Icon.Default.mergeOptions({
 });
 
 function normalizeList(payload) {
-  // Supports both: 1) array, 2) {data: array}, 3) {ok:true, data: array}
   if (Array.isArray(payload)) return payload;
   if (payload && Array.isArray(payload.data)) return payload.data;
   return [];
@@ -38,22 +38,20 @@ export default function LiveMap() {
 
   const [status, setStatus] = useState("Loading…");
 
-  // Separate errors (so you know EXACTLY what failed)
   const [routesError, setRoutesError] = useState("");
   const [stopsError, setStopsError] = useState("");
   const [busesError, setBusesError] = useState("");
 
-  // Loading states
   const [routesLoading, setRoutesLoading] = useState(true);
   const [stopsLoading, setStopsLoading] = useState(false);
 
-  // IMPORTANT: buses skeleton should show ONLY on first load
   const [busesFirstLoad, setBusesFirstLoad] = useState(true);
   const [busesSyncing, setBusesSyncing] = useState(false);
 
-  // Map + marker refs
   const mapRef = useRef(null);
   const busMarkerRefs = useRef({});
+
+  const [followBus, setFollowBus] = useState(false);
 
   // Load routes once
   useEffect(() => {
@@ -70,7 +68,6 @@ export default function LiveMap() {
         if (cancelled) return;
         setRoutes(list);
 
-        // choose first route by default
         if (list.length > 0) setSelectedRouteId(list[0].routeId);
       } catch (e) {
         if (cancelled) return;
@@ -130,12 +127,7 @@ export default function LiveMap() {
       try {
         setBusesError("");
 
-        // Skeleton only on very first load; after that show subtle syncing
-        if (busesFirstLoad) {
-          // show skeleton (handled in UI)
-        } else {
-          setBusesSyncing(true);
-        }
+        if (!busesFirstLoad) setBusesSyncing(true);
 
         const res = await getLiveBuses();
         const list = normalizeList(res);
@@ -164,7 +156,7 @@ export default function LiveMap() {
     };
   }, [busesFirstLoad]);
 
-  // Derived: visible buses by route (if routeId exists)
+  // Derived: visible buses by route
   const visibleBuses = useMemo(() => {
     if (!selectedRouteId) return buses;
     const anyRouteIdPresent = buses.some((b) => b.routeId);
@@ -189,6 +181,43 @@ export default function LiveMap() {
   const backendOk =
     !routesError && !stopsError && !busesError && !String(status).toLowerCase().includes("unreachable");
 
+  // Alerts (dynamic)
+  const alerts = useMemo(() => {
+    const list = [];
+
+    list.push({
+      type: "info",
+      title: "Public Notice",
+      message: "Live bus location is for public information. Accuracy may vary based on GPS/network.",
+    });
+
+    if (!backendOk) {
+      list.push({
+        type: "danger",
+        title: "Service Status",
+        message: "Backend appears unreachable. Live buses may not update.",
+      });
+    }
+
+    if (routesError) {
+      list.push({ type: "danger", title: "Routes", message: routesError });
+    }
+
+    if (stopsError) {
+      list.push({ type: "warn", title: "Stops", message: stopsError });
+    }
+
+    if (!busesFirstLoad && !busesError && visibleBuses.length === 0) {
+      list.push({
+        type: "warn",
+        title: "No Active Buses",
+        message: "No live buses currently available. GPS updates are required to show buses.",
+      });
+    }
+
+    return list;
+  }, [backendOk, routesError, stopsError, busesError, busesFirstLoad, visibleBuses.length]);
+
   // Focus animation
   function focusBus(bus) {
     if (!bus || bus.lat == null || bus.lng == null) return;
@@ -211,6 +240,9 @@ export default function LiveMap() {
       <div className="gov-banner">
         ℹ️ This system displays live bus location data for public information purposes.
       </div>
+
+      {/* ✅ New: Alerts Bar */}
+      <AlertsBar alerts={alerts} />
 
       <motion.main
         className="gov-main"
@@ -279,7 +311,6 @@ export default function LiveMap() {
             <div className="muted" style={{ wordBreak: "break-word" }}>
               API: routes={routes.length}, stops={stops.length}, buses={buses.length}
             </div>
-            
           </div>
         </section>
 
@@ -361,7 +392,6 @@ export default function LiveMap() {
               style={{ marginBottom: 10 }}
             />
 
-            {/* Show skeleton ONLY for first load */}
             <div className="list">
               {busesFirstLoad ? (
                 <>
@@ -430,9 +460,7 @@ export default function LiveMap() {
                     <div className="muted">
                       No live buses found{busQuery ? " for this search." : " yet."}
                       <br />
-                      {busQuery
-                        ? "Try a different bus ID."
-                        : "Send GPS updates to see buses on map."}
+                      {busQuery ? "Try a different bus ID." : "Send GPS updates to see buses on map."}
                     </div>
                   )}
                 </>
