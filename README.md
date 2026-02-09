@@ -1,5 +1,4 @@
 🚌 smartBus — Real-Time Public Transport Tracking Platform
-
 smartBus is a modern, responsive, real-time public transport tracking platform designed to visualize live bus locations, routes, stops, and estimated arrival times (ETA).
 Built with a government-grade UI, role-based access, and scalable architecture, it simulates how real-world intelligent transport systems operate today.
 
@@ -7,47 +6,31 @@ Built with a government-grade UI, role-based access, and scalable architecture, 
 🌍 Passenger (Public) View
 
 Live bus tracking on interactive maps (Leaflet + OpenStreetMap)
-
 Route-based filtering of buses and stops
-
 Real-time bus list with auto-refresh
-
 Animated bus markers with smooth motion
-
 ETA timeline (when backend available)
-
 Public notices & service alerts
-
 Fully responsive (desktop, tablet, mobile)
 
 🔐 Role-Based Access (UI-ready)
-
 Passenger (Public)
-
 Driver (Planned)
-
 Admin (Planned)
-
 Secure login UI (backend integration planned)
 
 🎨 UI & UX Highlights
-
 Government-style premium interface
-
 Light / Dark mode toggle
-
 Skeleton loaders for smooth loading UX
-
 Animated transitions (Framer Motion)
-
 Accessible typography (Inter / system fonts)
-
 Mobile-first responsive design
 
 📸 Screenshots
 🗺️ Live Map Dashboard
 <p align="center">
-  <img src="screenshots/dashboard.png" width="90%" />
+  <img src="screenshots/dashboard.png" height="50%" width="50%" />
 </p>
 🚌 Bus Details & ETA Page
 
@@ -57,29 +40,18 @@ Mobile-first responsive design
 
 🧱 Tech Stack
 Frontend
-
 React + Vite
-
 React Router
-
 Leaflet.js (Maps)
-
 Framer Motion (Animations)
-
 Modern CSS (Grid, Flexbox, Variables)
-
 Responsive & Mobile-First Design
 
 Backend (In Progress / Partial)
-
 Node.js
-
 Express
-
 MongoDB
-
 JWT Authentication
-
 Role-based Authorization
 
 🧠 Architecture Overview
@@ -109,7 +81,6 @@ npm run dev
 
 
 Frontend will run at:
-
 http://localhost:5173
 
 🧪 Current Status
@@ -121,39 +92,28 @@ ETA UI	⚠️ Backend pending
 Login UI	✅ Implemented
 Role-based Auth	⏳ Planned
 Admin Dashboard	⏳ Planned
+
 🔮 Future Enhancements
-
 Real ETA engine with traffic-aware calculations
-
 Admin dashboard for route & bus management
-
 Driver mobile interface for GPS updates
-
 Push notifications for delays & alerts
-
 Analytics dashboard (ridership, punctuality)
-
 Progressive Web App (PWA) support
 
 ⚠️ Disclaimer
-
 This platform is developed as an academic / capstone project.
 Live bus data and ETA calculations are simulated and meant for demonstration purposes only.
 
 👨‍💻 Author
-
-Your Name
-🎓 Computer Science / Software Engineering Capstone
+Nishad
+🎓 Computer Science and Engineering
 📍 India
-🔗 GitHub: https://github.com/your-username
+🔗 GitHub: https://github.com/NishadSharma
 
-⭐ Support
-
+Support
 If you like this project:
-
 ⭐ Star the repository
-
 🍴 Fork it
-
 🧠 Suggest improvements via issues
 
