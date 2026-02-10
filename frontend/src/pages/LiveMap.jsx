@@ -1,7 +1,8 @@
+import useTheme from "../hooks/useTheme";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Popup, CircleMarker } from "react-leaflet";
+import { MapContainer, TileLayer, Popup, CircleMarker, Polyline } from "react-leaflet";
 import { Link } from "react-router-dom";
 import L from "leaflet";
 
@@ -29,6 +30,9 @@ function normalizeList(payload) {
 }
 
 export default function LiveMap() {
+  const { t } = useTranslation(); // (can use later; safe)
+  const { theme, toggleTheme } = useTheme();
+
   const [busQuery, setBusQuery] = useState("");
   const [selectedBusId, setSelectedBusId] = useState(null);
 
@@ -52,10 +56,45 @@ export default function LiveMap() {
   const mapRef = useRef(null);
   const busMarkerRefs = useRef({});
 
-  const [followBus, setFollowBus] = useState(false);
-  const { t } = useTranslation();
+  // ---------------------------
+  // Derived: route polyline
+  // ---------------------------
+  const routeLine = useMemo(() => {
+    if (!stops || stops.length < 2) return [];
+    const sorted = [...stops].sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+    return sorted
+      .filter((s) => typeof s.lat === "number" && typeof s.lng === "number")
+      .map((s) => [s.lat, s.lng]);
+  }, [stops]);
 
+  // Derived: visible buses by route
+  const visibleBuses = useMemo(() => {
+    if (!selectedRouteId) return buses;
+    const anyRouteIdPresent = buses.some((b) => b.routeId);
+    if (!anyRouteIdPresent) return buses;
+    return buses.filter((b) => b.routeId === selectedRouteId);
+  }, [buses, selectedRouteId]);
+
+  // Derived: search filter
+  const filteredBuses = useMemo(() => {
+    const q = busQuery.trim().toLowerCase();
+    if (!q) return visibleBuses;
+    return visibleBuses.filter((b) => String(b.busId || "").toLowerCase().includes(q));
+  }, [visibleBuses, busQuery]);
+
+  // Map center
+  const mapCenter = useMemo(() => {
+    if (stops.length > 0) return [stops[0].lat, stops[0].lng];
+    return [30.7333, 76.7794];
+  }, [stops]);
+
+  // Header status
+  const backendOk =
+    !routesError && !stopsError && !busesError && !String(status).toLowerCase().includes("unreachable");
+
+  // ---------------------------
   // Load routes once
+  // ---------------------------
   useEffect(() => {
     let cancelled = false;
 
@@ -86,7 +125,9 @@ export default function LiveMap() {
     };
   }, []);
 
+  // ---------------------------
   // Load stops when route changes
+  // ---------------------------
   useEffect(() => {
     let cancelled = false;
 
@@ -121,14 +162,15 @@ export default function LiveMap() {
     };
   }, [selectedRouteId]);
 
+  // ---------------------------
   // Poll buses every 5 seconds
+  // ---------------------------
   useEffect(() => {
     let cancelled = false;
 
     async function loadOnceOrPoll() {
       try {
         setBusesError("");
-
         if (!busesFirstLoad) setBusesSyncing(true);
 
         const res = await getLiveBuses();
@@ -158,32 +200,24 @@ export default function LiveMap() {
     };
   }, [busesFirstLoad]);
 
-  // Derived: visible buses by route
-  const visibleBuses = useMemo(() => {
-    if (!selectedRouteId) return buses;
-    const anyRouteIdPresent = buses.some((b) => b.routeId);
-    if (!anyRouteIdPresent) return buses;
-    return buses.filter((b) => b.routeId === selectedRouteId);
-  }, [buses, selectedRouteId]);
+  // ---------------------------
+  // Fit map to route bounds (AFTER routeLine exists)
+  // ---------------------------
+  useEffect(() => {
+    if (!mapRef.current) return;
+    if (!routeLine || routeLine.length < 2) return;
 
-  // Derived: search filter
-  const filteredBuses = useMemo(() => {
-    const q = busQuery.trim().toLowerCase();
-    if (!q) return visibleBuses;
-    return visibleBuses.filter((b) => String(b.busId || "").toLowerCase().includes(q));
-  }, [visibleBuses, busQuery]);
+    try {
+      const bounds = L.latLngBounds(routeLine.map(([lat, lng]) => L.latLng(lat, lng)));
+      mapRef.current.fitBounds(bounds, { padding: [30, 30] });
+    } catch {
+      // ignore
+    }
+  }, [routeLine]);
 
-  // Map center
-  const mapCenter = useMemo(() => {
-    if (stops.length > 0) return [stops[0].lat, stops[0].lng];
-    return [30.7333, 76.7794];
-  }, [stops]);
-
-  // Header status
-  const backendOk =
-    !routesError && !stopsError && !busesError && !String(status).toLowerCase().includes("unreachable");
-
+  // ---------------------------
   // Alerts (dynamic)
+  // ---------------------------
   const alerts = useMemo(() => {
     const list = [];
 
@@ -201,14 +235,8 @@ export default function LiveMap() {
       });
     }
 
-    if (routesError) {
-      list.push({ type: "danger", title: "Routes", message: routesError });
-    }
-
-    if (stopsError) {
-      list.push({ type: "warn", title: "Stops", message: stopsError });
-    }
-
+    if (routesError) list.push({ type: "danger", title: "Routes", message: routesError });
+    if (stopsError) list.push({ type: "warn", title: "Stops", message: stopsError });
     if (!busesFirstLoad && !busesError && visibleBuses.length === 0) {
       list.push({
         type: "warn",
@@ -237,13 +265,15 @@ export default function LiveMap() {
 
   return (
     <div className="gov-shell page-enter">
-      <GovHeader lastSyncText={status} backendOk={backendOk} />
+      <GovHeader
+        lastSyncText={status}
+        backendOk={backendOk}
+        onToggleTheme={toggleTheme}
+        themeLabel={theme === "dark" ? "night" : "day"}
+      />
 
-      <div className="gov-banner">
-        ℹ️ This system displays live bus location data for public information purposes.
-      </div>
+      <div className="gov-banner">ℹ️ This system displays live bus location data for public information purposes.</div>
 
-      {/* ✅ New: Alerts Bar */}
       <AlertsBar alerts={alerts} />
 
       <motion.main
@@ -306,13 +336,6 @@ export default function LiveMap() {
                 Stops error: {stopsError}
               </div>
             )}
-
-            <div className="divider" />
-
-            <div className="label">Debug (for you)</div>
-            <div className="muted" style={{ wordBreak: "break-word" }}>
-              API: routes={routes.length}, stops={stops.length}, buses={buses.length}
-            </div>
           </div>
         </section>
 
@@ -334,6 +357,19 @@ export default function LiveMap() {
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
+
+              {/* Route Polyline */}
+              {routeLine.length >= 2 && (
+                <Polyline
+                  positions={routeLine}
+                  pathOptions={{
+                    color: "#0b4ea2",
+                    weight: 5,
+                    opacity: 0.85,
+                    lineJoin: "round",
+                  }}
+                />
+              )}
 
               {/* Stops */}
               {stops.map((s) => (
@@ -412,29 +448,16 @@ export default function LiveMap() {
                     <div className="skel skel-line lg"></div>
                     <div className="skel skel-line sm"></div>
                   </div>
-
-                  {busesError && (
-                    <div style={{ marginTop: 10, color: "#b91c1c", fontSize: 12 }}>
-                      Buses error: {busesError}
-                    </div>
-                  )}
                 </>
               ) : (
                 <>
-                  {busesError && (
-                    <div style={{ marginBottom: 10, color: "#b91c1c", fontSize: 12 }}>
-                      Buses error: {busesError}
-                    </div>
-                  )}
-
                   {filteredBuses.slice(0, 12).map((b) => (
                     <div
                       key={b.busId}
                       className="item"
                       style={{
                         cursor: "pointer",
-                        borderColor:
-                          b.busId === selectedBusId ? "rgba(11,78,162,0.65)" : undefined,
+                        borderColor: b.busId === selectedBusId ? "rgba(11,78,162,0.65)" : undefined,
                       }}
                       onClick={() => focusBus(b)}
                     >
@@ -442,16 +465,11 @@ export default function LiveMap() {
                         <b>{b.busId}</b>
                         <div className="kv">Speed: {b.speed ?? 0}</div>
                         <div className="kv">
-                          Last updated at{" "}
-                          {b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : "N/A"}
+                          Last: {b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : "N/A"}
                         </div>
                       </div>
-
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <Link
-                          to={`/bus/${encodeURIComponent(b.busId)}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <Link to={`/bus/${encodeURIComponent(b.busId)}`} onClick={(e) => e.stopPropagation()}>
                           Open →
                         </Link>
                       </div>
