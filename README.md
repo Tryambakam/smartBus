@@ -47,6 +47,12 @@ Accessible typography (Inter / system fonts)
 
 Mobile-first responsive design
 
+Project Design : 
+the UI/UX design for the smartBus platform, created in Figma. The design focuses on a clean, intuitive layout with clear visual hierarchy, easy navigation, and responsiveness to support a smooth user experience.
+
+It includes structured screens, consistent components, and defined user flows, serving as a visual reference for development and future enhancements.
+Link : https://www.figma.com/design/HBes82ZYORR1es0prPHoLd/punbus-website-design?node-id=0-1&t=Xs8OiWMqBlkxNjxR-1
+
 
 <h2>📸 Screenshots</h2>
 
