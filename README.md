@@ -47,6 +47,16 @@ Accessible typography (Inter / system fonts)
 
 Mobile-first responsive design
 
+## UI / UX Design
+
+The UI/UX design for the **smartBus** platform was created using **Figma**.  
+The design focuses on a clean and intuitive layout with a clear visual hierarchy, easy navigation, and responsive behavior to ensure a smooth user experience across devices.
+
+It includes well-structured screens, consistent UI components, and clearly defined user flows. This design serves as a visual reference for development and supports future enhancements of the platform.
+
+## 🔗 Figma Design Link:
+https://www.figma.com/design/HBes82ZYORR1es0prPHoLd/punbus-website-design?node-id=0-1&t=Xs8OiWMqBlkxNjxR-1
+
 
 <h2>📸 Screenshots</h2>
 
