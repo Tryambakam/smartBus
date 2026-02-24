@@ -1,4 +1,4 @@
-## smartBus — Real-Time Public Transport Tracking Platform
+## SmartBus — Real-Time Public Transport Tracking Platform
 
 smartBus is a modern, responsive, real-time public transport tracking platform designed to visualize live bus locations, routes, stops, and estimated arrival times (ETA).
 Built with a government-grade UI, role-based access, and scalable architecture, it simulates how real-world intelligent transport systems operate today.
