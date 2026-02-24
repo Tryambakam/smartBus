@@ -198,10 +198,10 @@ Live bus data and ETA calculations are simulated and meant for demonstration pur
 
 ## 👨‍💻 Author
 
-Nishad
-Tryambakam Dev Sharma
-Hari harans
-Swastik Sharma
+Nishad,
+Tryambakam Dev Sharma,
+Hari harans,
+Swastik Sharma,
 Sashi Kant
 
 🎓 Computer Science and Engineering
