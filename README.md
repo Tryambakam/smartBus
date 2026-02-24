@@ -1,11 +1,11 @@
-🚌 smartBus — Real-Time Public Transport Tracking Platform
+## smartBus — Real-Time Public Transport Tracking Platform
 
 smartBus is a modern, responsive, real-time public transport tracking platform designed to visualize live bus locations, routes, stops, and estimated arrival times (ETA).
 Built with a government-grade UI, role-based access, and scalable architecture, it simulates how real-world intelligent transport systems operate today.
 
-🚀 Live Features Overview
+## Live Features Overview
 
-🌍 Passenger (Public) View
+ Passenger (Public) View
 
 Live bus tracking on interactive maps (Leaflet + OpenStreetMap)
 
@@ -22,7 +22,7 @@ Public notices & service alerts
 Fully responsive (desktop, tablet, mobile)
 
 
-🔐 Role-Based Access (UI-ready)
+## Role-Based Access (UI-ready)
 
 Passenger (Public)
 
@@ -33,7 +33,7 @@ Admin (Planned)
 Secure login UI (backend integration planned)
 
 
-🎨 UI & UX Highlights
+## UI & UX Highlights
 
 Government-style premium interface
 
@@ -72,10 +72,10 @@ https://www.figma.com/design/HBes82ZYORR1es0prPHoLd/punbus-website-design?node-i
 
 
 
-🧱 Tech Stack
+## Tech Stack
 
 
-Frontend
+## Frontend
 
 React + Vite
 
@@ -91,7 +91,7 @@ Responsive & Mobile-First Design
 
 
 
-Backend (In Progress / Partial)
+## Backend (In Progress / Partial)
 
 Node.js
 
@@ -104,7 +104,7 @@ JWT Authentication
 Role-based Authorization
 
 
-🧠 Architecture Overview
+## Architecture Overview
 
 Frontend (React)
  
@@ -119,7 +119,7 @@ Frontend (React)
  └── Dark Mode / UX Enhancements
 
 
-Backend (Node + Express)
+## Backend (Node + Express)
 
  ├── Live Bus GPS API
  
@@ -130,7 +130,7 @@ Backend (Node + Express)
  └── Auth & Roles (Planned)
 
 
-⚙️ Local Setup
+## Local Setup
 
 
 1️⃣ Clone the Repository
@@ -155,7 +155,7 @@ Frontend will run at:
 http://localhost:5173
 
 
-🧪 Current Status
+## Current Status
 
 Feature	Status
 
@@ -174,7 +174,7 @@ Role-based Auth	⏳ Planned
 Admin Dashboard	⏳ Planned
 
 
-🔮 Future Enhancements
+## Future Enhancements
 
 Real ETA engine with traffic-aware calculations
 
@@ -189,14 +189,14 @@ Analytics dashboard (ridership, punctuality)
 Progressive Web App (PWA) support
 
 
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 This platform is developed as an academic / capstone project.
 
 Live bus data and ETA calculations are simulated and meant for demonstration purposes only.
 
 
-👨‍💻 Author
+## 👨‍💻 Author
 
 Nishad
 
