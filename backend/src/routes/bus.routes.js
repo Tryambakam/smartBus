@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const BusLatest = require("../models/BusLatest");
+const { requireAuth } = require("../middleware/auth");
 
 // GET /api/buses/live
-router.get("/buses/live", async (req, res) => {
+router.get("/buses/live", requireAuth, async (req, res) => {
   try {
     const buses = await BusLatest.find().sort({ timestamp: -1 }).limit(200);
     res.json(buses);

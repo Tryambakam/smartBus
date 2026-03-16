@@ -69,7 +69,7 @@ export default function BusDetails() {
 
           <div className="card-b">
             <div className="muted" style={{ marginBottom: 8 }}>
-              <Link to="/">← Back to Live Map</Link>
+              <Link to="/app">← Back to Live Map</Link>
             </div>
 
             <div style={{ fontSize: 18, fontWeight: 900 }}>{busId}</div>

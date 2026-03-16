@@ -4,9 +4,10 @@ const router = express.Router();
 const BusLatest = require("../models/BusLatest");
 const Stop = require("../models/Stop");
 const { haversineKm } = require("../utils/haversine");
+const { requireAuth } = require("../middleware/auth");
 
 // GET /api/bus/:busId/eta
-router.get("/bus/:busId/eta", async (req, res) => {
+router.get("/bus/:busId/eta", requireAuth, async (req, res) => {
   try {
     const { busId } = req.params;
 

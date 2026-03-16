@@ -3,9 +3,10 @@ const router = express.Router();
 
 const Route = require("../models/Route");
 const Stop = require("../models/Stop");
+const { requireAuth } = require("../middleware/auth");
 
 // GET /api/routes
-router.get("/routes", async (req, res) => {
+router.get("/routes", requireAuth, async (req, res) => {
   try {
     const routes = await Route.find().sort({ routeId: 1 });
     res.json(routes);
@@ -16,7 +17,7 @@ router.get("/routes", async (req, res) => {
 });
 
 // GET /api/routes/:routeId/stops
-router.get("/routes/:routeId/stops", async (req, res) => {
+router.get("/routes/:routeId/stops", requireAuth, async (req, res) => {
   try {
     const { routeId } = req.params;
     const stops = await Stop.find({ routeId }).sort({ sequence: 1 });

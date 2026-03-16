@@ -338,7 +338,7 @@ export default function LiveMap() {
       />
 
       <div className="gov-banner">
-        ℹ️ This system displays live bus location data for public information purposes.
+        🔒 Secure view: Live tracking is available only to authorized account holders.
       </div>
 
       <AlertsBar alerts={alerts} />

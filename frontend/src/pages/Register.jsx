@@ -1,45 +1,33 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
 import { API_BASE } from "../api";
 import useTheme from "../hooks/useTheme";
 
-export default function Login() {
+export default function Register() {
   const nav = useNavigate();
-  const loc = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const DEMO_EMAIL = "admin@smartbus.local";
-  const DEMO_PASSWORD = "Admin@12345";
-
-  useEffect(() => {
-    const q = new URLSearchParams(loc.search);
-    if (q.get("demo") === "1") {
-      setEmail(DEMO_EMAIL);
-      setPassword(DEMO_PASSWORD);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function onLogin(e) {
+  async function onRegister(e) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
       });
 
       const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || `Login failed: ${res.status}`);
+      if (!res.ok) throw new Error(data?.error || `Register failed: ${res.status}`);
 
       localStorage.setItem("smartbus_token", data.token);
       localStorage.setItem("smartbus_user", JSON.stringify(data.user));
@@ -51,18 +39,17 @@ export default function Login() {
     }
   }
 
-  const canSubmit = email.trim() && password;
+  const canSubmit = name.trim() && email.trim() && password;
 
   return (
     <div className="gov-shell">
       <GovHeader
-        lastSyncText="Secure Access"
+        lastSyncText="Create Account"
         backendOk={true}
         onToggleTheme={toggleTheme}
         themeLabel={theme === "dark" ? "night" : "day"}
       />
-
-      <div className="gov-banner">Sign in to your SmartBus account.</div>
+      <div className="gov-banner">Create your SmartBus account.</div>
 
       <motion.main
         className="gov-main login-main"
@@ -72,12 +59,23 @@ export default function Login() {
       >
         <section className="card">
           <div className="card-h">
-            <div className="h">Login</div>
-            <div className="muted">Use your email and password</div>
+            <div className="h">Register</div>
+            <div className="muted">Name, email, password</div>
           </div>
 
           <div className="card-b">
-            <form onSubmit={onLogin}>
+            <form onSubmit={onRegister}>
+              <div className="label">Full name</div>
+              <input
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+
+              <div style={{ height: 10 }} />
+
               <div className="label">Email</div>
               <input
                 className="input"
@@ -96,36 +94,19 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
 
               <div className="divider" />
 
               <button className="btn" type="submit" disabled={!canSubmit || loading}>
-                {loading ? "Signing in…" : "Sign in"}
+                {loading ? "Creating…" : "Create account"}
               </button>
 
               {error && <div style={{ color: "#b91c1c", marginTop: 10 }}>{error}</div>}
 
               <div className="muted" style={{ marginTop: 10 }}>
-                New here? <Link to="/register">Create an account</Link>
-              </div>
-
-              <div className="divider" />
-
-              <button
-                className="select"
-                type="button"
-                onClick={() => {
-                  setEmail(DEMO_EMAIL);
-                  setPassword(DEMO_PASSWORD);
-                }}
-              >
-                Use demo credentials
-              </button>
-
-              <div className="muted" style={{ marginTop: 8 }}>
-                Demo: <b>{DEMO_EMAIL}</b> / <b>{DEMO_PASSWORD}</b>
+                Already have an account? <Link to="/login">Sign in</Link>
               </div>
             </form>
           </div>
@@ -134,3 +115,4 @@ export default function Login() {
     </div>
   );
 }
+

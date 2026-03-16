@@ -6,27 +6,26 @@ const User = require("../models/User");
 async function run() {
   await connectDB();
 
-  const existingAdmin = await User.findOne({ role: "admin" });
-  if (existingAdmin) {
-    console.log("✅ Admin already exists:", existingAdmin.email);
+  const email = process.env.SEED_USER_EMAIL || process.env.SEED_ADMIN_EMAIL || "user@smartbus.local";
+  const existing = await User.findOne({ email: String(email).toLowerCase().trim() });
+  if (existing) {
+    console.log("✅ Seed user already exists:", existing.email);
     process.exit(0);
   }
 
-  const email = process.env.SEED_ADMIN_EMAIL || "admin@smartbus.local";
-  const password = process.env.SEED_ADMIN_PASSWORD || "Admin@12345";
-  const name = "System Admin";
+  const password = process.env.SEED_USER_PASSWORD || process.env.SEED_ADMIN_PASSWORD || "User@12345";
+  const name = process.env.SEED_USER_NAME || "Seed User";
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const admin = await User.create({
+  const user = await User.create({
     name,
     email,
     passwordHash,
-    role: "admin",
   });
 
-  console.log("✅ Admin created:");
-  console.log("Email:", admin.email);
+  console.log("✅ User created:");
+  console.log("Email:", user.email);
   console.log("Password:", password);
   process.exit(0);
 }

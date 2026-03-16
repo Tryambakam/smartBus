@@ -14,16 +14,6 @@ const UserSchema = new mongoose.Schema(
     },
 
     passwordHash: { type: String, required: true },
-
-    role: {
-      type: String,
-      enum: ["admin", "driver", "user"],
-      default: "user",
-      index: true,
-    },
-
-    // for drivers only (optional)
-    assignedBusId: { type: String, default: "" },
   },
   { timestamps: true, versionKey: false }
 );

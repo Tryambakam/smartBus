@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { updateGps } = require("../controllers/gps.controller");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth } = require("../middleware/auth");
 
-// 🔒 Driver can update GPS (Admin optional)
-router.post("/gps/update", requireAuth, requireRole("driver", "admin"), updateGps);
+// authenticated users can update GPS (no role-based access)
+router.post("/gps/update", requireAuth, updateGps);
 
 module.exports = router;
