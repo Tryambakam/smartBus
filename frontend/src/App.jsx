@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import RequireAuth from "./components/RequireAuth";
+import OperatorDemo from "./pages/OperatorDemo";
 
 
 export default function App() {
@@ -28,6 +29,14 @@ export default function App() {
           element={
             <RequireAuth>
               <BusDetails />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/operator"
+          element={
+            <RequireAuth>
+              <OperatorDemo />
             </RequireAuth>
           }
         />

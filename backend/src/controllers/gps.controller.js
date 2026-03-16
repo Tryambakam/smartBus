@@ -1,5 +1,4 @@
 const BusLatest = require("../models/BusLatest");
-const User = require("../models/User");
 
 function isNumber(x) {
   return typeof x === "number" && Number.isFinite(x);
@@ -20,21 +19,7 @@ exports.updateGps = async (req, res) => {
       return res.status(400).json({ ok: false, error: "lat/lng out of range" });
     }
 
-    if (req.user.role === "driver") {
-      const driver = await User.findById(req.user.id).lean();
-      if (!driver) return res.status(401).json({ ok: false, error: "Driver not found" });
-
-      if (!driver.assignedBusId) {
-        return res.status(403).json({ ok: false, error: "Driver has no assigned bus" });
-      }
-
-      if (String(driver.assignedBusId) !== String(busId)) {
-        return res.status(403).json({
-          ok: false,
-          error: "Forbidden: driver can update only assigned bus",
-        });
-      }
-    }
+    // Note: role-based restrictions removed. Any authenticated account can submit GPS updates.
 
     if (speed == null) speed = 0;
     if (!isNumber(speed)) speed = 0;

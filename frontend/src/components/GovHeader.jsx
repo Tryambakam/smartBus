@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bus,
   ShieldCheck,
@@ -6,10 +7,12 @@ import {
   PhoneCall,
   RefreshCw,
   LogIn,
+  LogOut,
   Sun,
   Moon,
   Globe,
 } from "lucide-react";
+import { clearSession, getAuthToken } from "../api";
 
 export default function GovHeader({
   lastSyncText,
@@ -18,6 +21,8 @@ export default function GovHeader({
   themeLabel = "day",
 }) {
   const { t, i18n } = useTranslation();
+  const nav = useNavigate();
+  const isAuthed = Boolean(getAuthToken());
 
   const setLang = (lng) => i18n.changeLanguage(lng);
 
@@ -76,11 +81,31 @@ export default function GovHeader({
               </span>
             </button>
 
-            {/* Login */}
-            <a className="icon-btn" href="/login" aria-label="Login">
-              <LogIn size={16} />
-              <span className="icon-btn-text">{t("app.login")}</span>
-            </a>
+            {/* Auth */}
+            {isAuthed ? (
+              <>
+                <Link className="icon-btn" to="/operator" aria-label="Operator demo">
+                  <Bus size={16} />
+                  <span className="icon-btn-text">Operator</span>
+                </Link>
+                <button
+                  className="icon-btn"
+                  onClick={() => {
+                    clearSession();
+                    nav("/welcome");
+                  }}
+                  aria-label="Logout"
+                >
+                  <LogOut size={16} />
+                  <span className="icon-btn-text">Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link className="icon-btn" to="/login" aria-label="Login">
+                <LogIn size={16} />
+                <span className="icon-btn-text">{t("app.login")}</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>

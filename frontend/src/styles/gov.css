@@ -374,6 +374,7 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
   border: 1px solid var(--border);
   background: #fff;
   font-size: 14px;
+  color: var(--text);
 }
 
 :root[data-theme="dark"] .select,

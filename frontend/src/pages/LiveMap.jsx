@@ -9,7 +9,7 @@ import L from "leaflet";
 import GovHeader from "../components/GovHeader";
 import AlertsBar from "../components/AlertsBar";
 import BusMarker from "../components/BusMarker";
-import { getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
+import { getBusLatest, getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
 import { io as ioClient } from "socket.io-client";
 
 // Fix Leaflet marker icons (for stops)
@@ -44,6 +44,9 @@ export default function LiveMap() {
 
   const [busQuery, setBusQuery] = useState("");
   const [selectedBusId, setSelectedBusId] = useState(null);
+  const [selectedBus, setSelectedBus] = useState(null);
+  const [selectedBusLoading, setSelectedBusLoading] = useState(false);
+  const [selectedBusError, setSelectedBusError] = useState("");
 
   const [buses, setBuses] = useState([]);
   const [routes, setRoutes] = useState([]);
@@ -317,6 +320,7 @@ export default function LiveMap() {
   function focusBus(bus) {
     if (!bus || !hasLatLng(bus)) return;
     setSelectedBusId(bus.busId);
+    setSelectedBus(bus);
 
     if (mapRef.current) {
       mapRef.current.flyTo([bus.lat, bus.lng], 16, { duration: 1.2 });
@@ -327,6 +331,32 @@ export default function LiveMap() {
       if (marker && typeof marker.openPopup === "function") marker.openPopup();
     }, 650);
   }
+
+  // Load latest details for selected bus (lightweight, RedBus-like “status card”)
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedBusId) {
+      setSelectedBus(null);
+      setSelectedBusError("");
+      return;
+    }
+    (async () => {
+      try {
+        setSelectedBusError("");
+        setSelectedBusLoading(true);
+        const res = await getBusLatest(selectedBusId);
+        const latest = res?.data || res;
+        if (!cancelled && latest) setSelectedBus(latest);
+      } catch (e) {
+        if (!cancelled) setSelectedBusError(String(e?.message || e));
+      } finally {
+        if (!cancelled) setSelectedBusLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedBusId]);
 
   return (
     <div className="gov-shell page-enter">
@@ -357,6 +387,26 @@ export default function LiveMap() {
           </div>
 
           <div className="card-b">
+            <div className="label">Quick actions</div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
+              <Link className="btn" to="/operator" style={{ width: "auto", padding: "10px 14px" }}>
+                Operator demo →
+              </Link>
+              {selectedBusId ? (
+                <button
+                  className="select"
+                  type="button"
+                  onClick={() => {
+                    setSelectedBusId(null);
+                    setSelectedBus(null);
+                  }}
+                  style={{ width: "auto", padding: "10px 14px" }}
+                >
+                  Clear selection
+                </button>
+              ) : null}
+            </div>
+
             <div className="label">Select Route</div>
 
             {routesLoading ? (
@@ -391,6 +441,35 @@ export default function LiveMap() {
               Stops: <b>{safeStops.length}</b> · Buses: <b>{visibleBuses.length}</b>
               {busesSyncing ? <span style={{ marginLeft: 8 }}>· Syncing…</span> : null}
             </div>
+
+            <div className="divider" />
+
+            <div className="label">Selected bus</div>
+            {!selectedBusId ? (
+              <div className="muted">Click a bus marker or choose one from the list.</div>
+            ) : selectedBusLoading ? (
+              <div className="skel-card">
+                <div className="skel skel-line md"></div>
+                <div className="skel skel-line lg"></div>
+                <div className="skel skel-line sm"></div>
+              </div>
+            ) : selectedBusError ? (
+              <div style={{ color: "#b91c1c", fontSize: 12 }}>{selectedBusError}</div>
+            ) : selectedBus ? (
+              <div className="item" style={{ flexDirection: "column" }}>
+                <b>{selectedBus.busId}</b>
+                <div className="kv">Route: {selectedBus.routeId || "—"}</div>
+                <div className="kv">Speed: {selectedBus.speed ?? 0} km/h</div>
+                <div className="kv">
+                  Updated: {selectedBus.timestamp ? new Date(selectedBus.timestamp).toLocaleTimeString() : "—"}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <Link to={`/bus/${encodeURIComponent(selectedBus.busId)}`}>Open details →</Link>
+                </div>
+              </div>
+            ) : (
+              <div className="muted">No details available.</div>
+            )}
 
             {stopsLoading && (
               <div className="muted" style={{ marginTop: 6 }}>

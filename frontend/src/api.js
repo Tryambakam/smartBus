@@ -8,6 +8,15 @@ export function getAuthToken() {
   }
 }
 
+export function clearSession() {
+  try {
+    localStorage.removeItem("smartbus_token");
+    localStorage.removeItem("smartbus_user");
+  } catch {
+    // ignore
+  }
+}
+
 export function authHeaders(extra = {}) {
   const token = getAuthToken();
   return token ? { ...extra, Authorization: `Bearer ${token}` } : { ...extra };
