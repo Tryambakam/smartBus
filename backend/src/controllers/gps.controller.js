@@ -6,7 +6,7 @@ function isNumber(x) {
 
 exports.updateGps = async (req, res) => {
   try {
-    let { busId, lat, lng, speed, routeId } = req.body;
+    let { busId, lat, lng, speed, routeId, busStatus } = req.body;
 
     if (typeof busId === "string") busId = busId.trim();
     if (typeof routeId === "string") routeId = routeId.trim();
@@ -27,12 +27,16 @@ exports.updateGps = async (req, res) => {
 
     if (typeof routeId !== "string") routeId = "";
 
+    const validStatuses = ["On Route", "Stopped", "Out of Service"];
+    if (!validStatuses.includes(busStatus)) busStatus = "On Route";
+
     const doc = {
       busId,
       lat,
       lng,
       speed,
       routeId,
+      busStatus,
       timestamp: new Date(),
       location: { type: "Point", coordinates: [Number(lng), Number(lat)] },
     };

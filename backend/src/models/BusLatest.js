@@ -9,6 +9,11 @@ const BusLatestSchema = new mongoose.Schema(
 
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
+    busStatus: { 
+      type: String, 
+      default: "On Route", 
+      enum: ["On Route", "Stopped", "Out of Service"] 
+    },
 
     // GeoJSON point for spatial queries
     location: {

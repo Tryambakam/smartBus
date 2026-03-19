@@ -7,6 +7,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const connectDB = require("./db");
+const { startMockStream } = require("./utils/mockSocketServer");
 
 // Route modules
 const busRoutes = require("./routes/bus.routes");
@@ -59,6 +60,9 @@ connectDB()
 
     // attach io for controllers to use
     app.locals.io = io;
+
+    // Boot mock simulator
+    startMockStream(io);
 
     io.on("connection", (socket) => {
       console.log("🔌 Socket connected:", socket.id);

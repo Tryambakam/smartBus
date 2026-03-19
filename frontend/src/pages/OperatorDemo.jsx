@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
@@ -12,8 +12,17 @@ export default function OperatorDemo() {
   const [routeId, setRouteId] = useState("");
   const [speed, setSpeed] = useState(18);
   const [status, setStatus] = useState("Idle");
+  const [busStatus, setBusStatus] = useState("On Route");
   const [err, setErr] = useState("");
   const [sending, setSending] = useState(false);
+
+  const [toastMsg, setToastMsg] = useState("");
+  const [showDelayModal, setShowDelayModal] = useState(false);
+  const [delayReason, setDelayReason] = useState("Traffic");
+
+  const [isSharing, setIsSharing] = useState(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
+  const [geoErrTooltip, setGeoErrTooltip] = useState("");
 
   const watchIdRef = useRef(null);
   const lastSentRef = useRef(0);
@@ -31,6 +40,7 @@ export default function OperatorDemo() {
           lat,
           lng,
           speed: Number(speed) || 0,
+          busStatus
         }),
       });
       const data = await res.json().catch(() => null);
@@ -44,8 +54,20 @@ export default function OperatorDemo() {
     }
   }
 
+  function handleAnnounce() {
+    setToastMsg("Announcement: Approaching next stop. Please prepare to exit.");
+    setTimeout(() => setToastMsg(""), 3000);
+  }
+
+  function handleReportDelayConfirm() {
+    setToastMsg(`Public Notice: Bus delayed due to ${delayReason}.`);
+    setTimeout(() => setToastMsg(""), 4000);
+    setShowDelayModal(false);
+  }
+
   function start() {
     setErr("");
+    setGeoErrTooltip("");
     if (!navigator.geolocation) {
       setErr("Geolocation is not supported in this browser.");
       return;
@@ -58,6 +80,9 @@ export default function OperatorDemo() {
     setStatus("Starting…");
     const id = navigator.geolocation.watchPosition(
       (pos) => {
+        setIsSharing(true);
+        setGpsAccuracy(Math.round(pos.coords.accuracy));
+
         const now = Date.now();
         // throttle to ~1 update / 2 seconds
         if (now - lastSentRef.current < 2000) return;
@@ -65,7 +90,13 @@ export default function OperatorDemo() {
         sendUpdate({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       },
       (e) => {
-        setErr(e?.message || "Location permission denied.");
+        setIsSharing(false);
+        setGpsAccuracy(null);
+        if (e.code === 1) {
+          setGeoErrTooltip("Location permission denied. Please click the site settings icon in your browser's URL bar, allow location access, and reload.");
+        } else {
+          setErr(e?.message || "Location access failed.");
+        }
         setStatus("Stopped");
       },
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
@@ -82,6 +113,8 @@ export default function OperatorDemo() {
       }
       watchIdRef.current = null;
     }
+    setIsSharing(false);
+    setGpsAccuracy(null);
     setStatus("Stopped");
   }
 
@@ -115,7 +148,18 @@ export default function OperatorDemo() {
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <div className="label">Bus ID</div>
+                <div className="label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  Bus ID
+                  {isSharing && (
+                    <span style={{ 
+                      display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 8px", 
+                      backgroundColor: "#ffe4e6", color: "#e11d48", fontSize: "0.7rem", fontWeight: "bold", 
+                      borderRadius: 999, border: "1px solid #fecdd3", animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite" 
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: 999, backgroundColor: "#e11d48" }}></span> LIVE
+                    </span>
+                  )}
+                </div>
                 <input className="input" value={busId} onChange={(e) => setBusId(e.target.value)} />
               </div>
               <div>
@@ -133,17 +177,32 @@ export default function OperatorDemo() {
                 />
               </div>
               <div>
-                <div className="label">Status</div>
-                <div className="item" style={{ justifyContent: "flex-start" }}>
-                  <b>{status}</b>
-                  {sending ? <span className="kv" style={{ marginLeft: 8 }}>sending…</span> : null}
+                <div className="label">Sync Status</div>
+                <div className="item" style={{ flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <b>{status}</b>
+                    {sending ? <span className="kv" style={{ marginLeft: 8 }}>sending…</span> : null}
+                  </div>
+                  {gpsAccuracy !== null && (
+                    <div style={{ fontSize: "0.75rem", color: "#64748b", fontWeight: 500 }}>
+                      GPS accuracy: ±{gpsAccuracy}m
+                    </div>
+                  )}
                 </div>
+              </div>
+              <div>
+                <div className="label">Bus Status</div>
+                <select className="input" value={busStatus} onChange={(e) => setBusStatus(e.target.value)}>
+                  <option value="On Route">On Route</option>
+                  <option value="Stopped">Stopped</option>
+                  <option value="Out of Service">Out of Service</option>
+                </select>
               </div>
             </div>
 
             <div className="divider" />
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20 }}>
               <button className="btn" onClick={start}>
                 Start sharing location
               </button>
@@ -152,7 +211,22 @@ export default function OperatorDemo() {
               </button>
             </div>
 
-            {err ? <div style={{ color: "#b91c1c", marginTop: 10 }}>{err}</div> : null}
+            <div className="divider" />
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button className="btn" style={{ backgroundColor: "#0b4ea2" }} onClick={handleAnnounce}>
+                Announce Next Stop
+              </button>
+              <button className="btn" style={{ backgroundColor: "#b91c1c" }} onClick={() => setShowDelayModal(true)}>
+                Report Delay...
+              </button>
+            </div>
+
+            {(err || geoErrTooltip) ? (
+              <div style={{ color: "#b91c1c", marginTop: 10, fontSize: "0.9rem", backgroundColor: "#fef2f2", padding: "10px 14px", borderRadius: 8, border: "1px solid #fecaca" }}>
+                <b>Error:</b> {err || geoErrTooltip}
+              </div>
+            ) : null}
 
             <div className="muted" style={{ marginTop: 10 }}>
               Tip: Keep the dashboard open on another tab and watch the bus appear/move in real-time.
@@ -160,6 +234,61 @@ export default function OperatorDemo() {
           </div>
         </section>
       </motion.main>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            style={{
+              position: "fixed", top: 80, right: 20, zIndex: 9999,
+              backgroundColor: "#10b981", color: "white", padding: "12px 20px",
+              borderRadius: 8, boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+              fontWeight: "bold"
+            }}
+          >
+            {toastMsg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delay Modal Override */}
+      <AnimatePresence>
+        {showDelayModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{
+              position: "fixed", inset: 0, zIndex: 9999, display: "flex",
+              alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              style={{
+                backgroundColor: "white", padding: 24, borderRadius: 12, width: "100%", maxWidth: 320,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
+              }}
+            >
+              <h3 style={{ marginTop: 0, color: "#0f172a", fontSize: "1.25rem", fontWeight: "bold" }}>Report Delay</h3>
+              <p style={{ fontSize: 14, color: "#64748b", mb: 16 }}>Select the reason for the transit delay to notify central systems immediately.</p>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, marginTop: 16 }}>
+                {["Traffic", "Mechanical", "Weather", "Emergency"].map(r => (
+                  <label key={r} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#334155", fontWeight: "500" }}>
+                    <input type="radio" name="delayReason" value={r} checked={delayReason === r} onChange={(e) => setDelayReason(e.target.value)} style={{ width: 16, height: 16 }} />
+                    {r}
+                  </label>
+                ))}
+              </div>
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button className="select" onClick={() => setShowDelayModal(false)}>Cancel</button>
+                <button className="btn" style={{ backgroundColor: "#b91c1c" }} onClick={handleReportDelayConfirm}>Confirm Delay</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

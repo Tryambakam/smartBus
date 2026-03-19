@@ -12,6 +12,11 @@ export default function useTheme() {
     // IMPORTANT: CSS uses :root[data-theme="dark"] => set on <html>
     const root = document.documentElement;
     root.setAttribute("data-theme", theme);
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
     localStorage.setItem("theme", theme);
   }, [theme]);
 

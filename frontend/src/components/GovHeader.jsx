@@ -2,15 +2,12 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Bus,
-  ShieldCheck,
-  ShieldX,
-  PhoneCall,
-  RefreshCw,
   LogIn,
   LogOut,
   Sun,
   Moon,
   Globe,
+  ChevronDown,
 } from "lucide-react";
 import { clearSession, getAuthToken } from "../api";
 
@@ -44,33 +41,22 @@ export default function GovHeader({
         </div>
 
         {/* Right cluster */}
-        <div className="gov-right">
-          <div className="gov-pills" aria-label="status pills">
-            <div className={`pill ${backendOk ? "ok" : "bad"}`} title={t("app.service")}>
-              {backendOk ? <ShieldCheck size={14} /> : <ShieldX size={14} />}
-              {backendOk ? t("app.operational") : t("app.down")}
-              <span className="status-dot" aria-hidden="true" />
-            </div>
-
-            <div className="pill" title={t("app.lastSync")}>
-              <RefreshCw size={14} />
-              {lastSyncText}
-            </div>
-
-            <div className="pill" title={t("app.helpline")}>
-              <PhoneCall size={14} />
-              1800-XXX-XXXX
-            </div>
-          </div>
-
+        <div className="gov-right flex items-center justify-end w-full">
           {/* Actions */}
           <div className="gov-actions" aria-label="actions">
             {/* Language */}
-            <div className="lang-pill" title="Language">
-              <Globe size={14} style={{ opacity: 0.9 }} />
-              <button className="chip" onClick={() => setLang("en")}>EN</button>
-              <button className="chip" onClick={() => setLang("hi")}>हिं</button>
-              <button className="chip" onClick={() => setLang("pa")}>ਪੰ</button>
+            <div className="relative flex items-center bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg border border-white/20 transition-colors" title="Select Language">
+              <Globe size={14} style={{ opacity: 0.9 }} className="mr-1.5" />
+              <select 
+                className="bg-transparent text-sm font-bold outline-none cursor-pointer appearance-none pr-4 text-inherit uppercase"
+                value={i18n.language.split('-')[0]}
+                onChange={(e) => setLang(e.target.value)}
+              >
+                <option value="en" className="text-slate-800">EN</option>
+                <option value="hi" className="text-slate-800">HI</option>
+                <option value="pa" className="text-slate-800">PA</option>
+              </select>
+              <ChevronDown size={12} className="absolute right-1.5 opacity-70 pointer-events-none" />
             </div>
 
             {/* Theme */}

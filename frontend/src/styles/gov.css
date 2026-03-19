@@ -473,7 +473,7 @@ select:focus, button:focus, input:focus{
 .page-enter{ animation: fadeIn 220ms var(--ease) both; }
 
 /* Bus Marker */
-.bus-marker-icon{ background: transparent !important; border: none !important; }
+.bus-marker-icon{ background: transparent !important; border: none !important; transition: transform 1.5s linear, margin 0.3s; }
 .bus-marker-wrap{
   width: 34px;
   height: 34px;
@@ -485,8 +485,65 @@ select:focus, button:focus, input:focus{
   font-size: 20px;
   z-index: 2;
   animation: busFloat 2.6s var(--ease) infinite;
-  filter: drop-shadow(0 8px 14px rgba(17,24,39,0.25));
 }
+.bus-marker-chevron{
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 6px rgba(17,24,39,0.35));
+}
+.marker-bounce .bus-marker-chevron svg{
+  fill: #16a34a !important; /* Green on selected */
+}
+.marker-bounce .bus-marker-chevron {
+  animation: markerBounce 0.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+  filter: drop-shadow(0 10px 18px rgba(11,78,162,0.6));
+}
+/* Marker Cluster Overrides */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background-color: rgba(11, 78, 162, 0.4);
+  border-radius: 50%;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background-color: rgba(11, 78, 162, 0.95);
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  margin-top: 4px;
+  margin-left: 4px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(11, 78, 162, 0.4);
+  transition: all 0.3s var(--ease);
+}
+
+:root[data-theme="dark"] .marker-cluster-small,
+:root[data-theme="dark"] .marker-cluster-medium,
+:root[data-theme="dark"] .marker-cluster-large {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+:root[data-theme="dark"] .marker-cluster-small div,
+:root[data-theme="dark"] .marker-cluster-medium div,
+:root[data-theme="dark"] .marker-cluster-large div {
+  background-color: rgba(59, 130, 246, 0.95);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+}
+
+.marker-cluster:hover div {
+  transform: scale(1.15);
+  background-color: #16a34a; /* Emerald hover */
+  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.5);
+}
+
 .bus-marker-pulse{
   position: absolute;
   inset: 6px;
@@ -496,6 +553,52 @@ select:focus, button:focus, input:focus{
   animation: busPulse 2.0s var(--ease) infinite;
   z-index: 1;
 }
+
+/* Stop Marker */
+.stop-marker-icon{ background: transparent !important; border: none !important; }
+.stop-marker{
+  width: 24px;
+  height: 24px;
+  background: #ffffff;
+  border: 2.5px solid #0b4ea2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(17,24,39,0.25);
+  transition: all 0.25s var(--ease);
+}
+.stop-num{
+  font-size: 11px;
+  font-weight: 800;
+  color: #0b4ea2;
+}
+.stop-hover{
+  transform: scale(1.3);
+  background: #0b4ea2;
+  border-color: #ffffff;
+  box-shadow: 0 6px 12px rgba(11,78,162,0.4);
+}
+.stop-hover .stop-num{
+  color: #ffffff;
+}
+:root[data-theme="dark"] .stop-marker{
+  background: #0f172a;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+:root[data-theme="dark"] .stop-num{
+  color: #3b82f6;
+}
+:root[data-theme="dark"] .stop-hover{
+  background: #2563eb;
+  border-color: #ffffff;
+  box-shadow: 0 6px 14px rgba(37,99,235,0.5);
+}
+:root[data-theme="dark"] .stop-hover .stop-num{
+  color: #ffffff;
+}
+
 @keyframes busFloat{
   0%{ transform: translateY(0); }
   50%{ transform: translateY(-4px); }
@@ -633,3 +736,20 @@ select:focus, button:focus, input:focus{
   border: 1px solid rgba(255,255,255,0.18);
 }
 .lang-pill .chip{ margin: 0; }
+
+/* =========================================================
+   New Enhancements: Marker Bounce Animation
+========================================================= */
+.marker-bounce .bus-marker-emoji {
+  animation: markerBounce 0.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+  filter: drop-shadow(0 10px 18px rgba(11,78,162,0.6));
+}
+
+:root[data-theme="dark"] .marker-bounce .bus-marker-emoji {
+  filter: drop-shadow(0 10px 18px rgba(96,165,250,0.6));
+}
+
+@keyframes markerBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.1); }
+}

@@ -1,3 +1,7 @@
+@import "tailwindcss";
+
+/* Ensure dark mode class selector works in v4 */
+@custom-variant dark (&:where(.dark, .dark *));
 :root{
   font-synthesis: none;
   text-rendering: optimizeLegibility;

@@ -5,7 +5,7 @@ const RouteModel = require("../models/Route");
 const StopModel = require("../models/Stop");
 const { requireAuth } = require("../middleware/auth");
 
-router.use(requireAuth);
+router.use("/admin", requireAuth);
 
 // ROUTES CRUD
 router.post("/admin/routes", async (req, res) => {

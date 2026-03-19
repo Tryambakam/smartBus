@@ -1,14 +1,20 @@
 import useTheme from "../hooks/useTheme";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+/* eslint-disable-next-line no-unused-vars */
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Popup, CircleMarker, Polyline } from "react-leaflet";
 import { Link } from "react-router-dom";
+import { RefreshCw, MapPin, Camera, X } from "lucide-react";
 import L from "leaflet";
 
 import GovHeader from "../components/GovHeader";
 import AlertsBar from "../components/AlertsBar";
 import BusMarker from "../components/BusMarker";
+import StopMarker from "../components/StopMarker";
+import MarkerClusterGroup from "react-leaflet-cluster";
+import { ResponsiveContainer, LineChart, Line, YAxis, Tooltip } from "recharts";
+import useDebounce from "../hooks/useDebounce";
 import { getBusLatest, getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
 import { io as ioClient } from "socket.io-client";
 
@@ -39,10 +45,18 @@ function hasLatLng(obj) {
 }
 
 export default function LiveMap() {
-  const { t } = useTranslation(); // safe even if unused
+  // const { t } = useTranslation(); // safe even if unused
   const { theme, toggleTheme } = useTheme();
 
+  const [showNotice, setShowNotice] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [busFilter, setBusFilter] = useState("All");
   const [busQuery, setBusQuery] = useState("");
+  const debouncedBusQuery = useDebounce(busQuery, 300);
+  const [hoveredStopId, setHoveredStopId] = useState(null);
+  const [activeLocationTracker, setActiveLocationTracker] = useState(null);
+  const [showStreetViewPanel, setShowStreetViewPanel] = useState(false);
+  const [speedHistoryMap, setSpeedHistoryMap] = useState({});
   const [selectedBusId, setSelectedBusId] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [selectedBusLoading, setSelectedBusLoading] = useState(false);
@@ -94,10 +108,14 @@ export default function LiveMap() {
 
   // ✅ Search filter
   const filteredBuses = useMemo(() => {
-    const q = busQuery.trim().toLowerCase();
-    if (!q) return visibleBuses;
-    return visibleBuses.filter((b) => String(b.busId || "").toLowerCase().includes(q));
-  }, [visibleBuses, busQuery]);
+    let result = visibleBuses;
+    if (busFilter === "Active") result = result.filter(b => b.speed > 0);
+    else if (busFilter === "Stopped") result = result.filter(b => b.speed === 0);
+
+    const q = debouncedBusQuery.trim().toLowerCase();
+    if (!q) return result;
+    return result.filter((b) => String(b.busId || "").toLowerCase().includes(q));
+  }, [visibleBuses, busFilter, debouncedBusQuery]);
 
   // ✅ Safer map center (first valid stop, else default)
   const mapCenter = useMemo(() => {
@@ -134,6 +152,24 @@ export default function LiveMap() {
       setSocketConnected(false);
     });
 
+    socket.on("busesStream", (busesPayload) => {
+      setBuses(busesPayload);
+      setStatus(`Live Stream: ${new Date().toLocaleTimeString()}`);
+      setBusesSyncing(true);
+      setTimeout(() => setBusesSyncing(false), 500);
+
+      setSpeedHistoryMap(prev => {
+        const next = { ...prev };
+        const timeLabel = new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' });
+        busesPayload.forEach(b => {
+          if (!next[b.busId]) next[b.busId] = [];
+          next[b.busId] = [...next[b.busId], { time: timeLabel, speed: b.speed }];
+          if (next[b.busId].length > 30) next[b.busId].shift(); // Keep last 30 intervals (5 min proxy)
+        });
+        return next;
+      });
+    });
+
     socket.on("bus:update", (bus) => {
       setBuses((prev) => {
         const map = new Map(prev.map((b) => [b.busId, b]));
@@ -150,11 +186,15 @@ export default function LiveMap() {
     return () => {
       try {
         socket.close();
-      } catch {}
+      } catch (e) { /* ignore */ }
     };
     // Note: API_BASE is stable; leaving empty deps is fine for a single connect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ---------------------------
+  // (Mock Simulator moved to backend socket!)
+  // ---------------------------
 
   // ---------------------------
   // Load routes once
@@ -179,8 +219,7 @@ export default function LiveMap() {
         setRoutes([]);
         setRoutesError(e?.message || "Failed to load routes");
       } finally {
-        if (cancelled) return;
-        setRoutesLoading(false);
+        if (!cancelled) setRoutesLoading(false);
       }
     })();
 
@@ -216,8 +255,7 @@ export default function LiveMap() {
         setStops([]);
         setStopsError(e?.message || "Failed to load stops");
       } finally {
-        if (cancelled) return;
-        setStopsLoading(false);
+        if (!cancelled) setStopsLoading(false);
       }
     })();
 
@@ -252,9 +290,10 @@ export default function LiveMap() {
         setBusesError(e?.message || "Failed to fetch live buses");
         setStatus("Backend unreachable");
       } finally {
-        if (cancelled) return;
-        setBusesFirstLoad(false);
-        setBusesSyncing(false);
+        if (!cancelled) {
+          setBusesFirstLoad(false);
+          setBusesSyncing(false);
+        }
       }
     }
 
@@ -359,7 +398,7 @@ export default function LiveMap() {
   }, [selectedBusId]);
 
   return (
-    <div className="gov-shell page-enter">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B1E33] flex flex-col font-sans text-slate-800 dark:text-slate-100 page-enter transition-colors duration-300">
       <GovHeader
         lastSyncText={status}
         backendOk={backendOk}
@@ -367,53 +406,75 @@ export default function LiveMap() {
         themeLabel={theme === "dark" ? "night" : "day"}
       />
 
-      <div className="gov-banner">
+      <div className="bg-[#0b4ea2] dark:bg-slate-900/80 dark:border-b dark:border-white/10 text-white text-sm py-2 px-4 shadow-md text-center z-20 relative transition-colors duration-300">
         🔒 Secure view: Live tracking is available only to authorized account holders.
       </div>
+
+      {showNotice && (
+        <div className="bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm py-2 px-4 shadow-sm relative flex justify-center items-center gap-2 transition-colors duration-300 z-20">
+          <span className="font-bold shrink-0">Public Notice &mdash;</span>
+          <span>Live bus location is for public information. Accuracy may vary based on GPS/network.</span>
+          <button
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
+            onClick={() => setShowNotice(false)}
+            aria-label="Dismiss notice"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <AlertsBar alerts={alerts} />
 
       <motion.main
-        className="gov-main"
+        className="flex-1 w-full max-w-[1600px] mx-auto p-4 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {/* LEFT PANEL */}
-        <section className="card left-panel">
-          <div className="card-h">
-            <div className="h">Controls</div>
-            <div className="muted">Route & display</div>
+        {/* LEFT PANEL (CONTROLS SIDEBAR) */}
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-8rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-1 z-10 transition-colors duration-300">
+          <div>
+            <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Controls</h2>
+            <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Route & display</div>
           </div>
 
-          <div className="card-b">
-            <div className="label">Quick actions</div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-              <Link className="btn" to="/operator" style={{ width: "auto", padding: "10px 14px" }}>
-                Operator demo →
+          <div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">Quick actions</div>
+            <div className="flex gap-2 flex-wrap">
+              <Link className="px-4 py-2 text-sm font-medium bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-600 drop-shadow-sm flex items-center gap-1 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-200" to="/operator">
+                Operator demo &rarr;
               </Link>
+              <button
+                className="px-4 py-2 text-sm font-medium bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-lg border border-emerald-200 dark:border-emerald-800 drop-shadow-sm flex items-center gap-1.5 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-200"
+                type="button"
+                onClick={() => alert("Simulation: Sharing live GPS... View the map!")}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Start sharing location
+              </button>
               {selectedBusId ? (
                 <button
-                  className="select"
+                  className="px-4 py-2 text-sm font-medium bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-lg transition-colors border border-rose-200 dark:border-rose-800 drop-shadow-sm"
                   type="button"
                   onClick={() => {
                     setSelectedBusId(null);
                     setSelectedBus(null);
                   }}
-                  style={{ width: "auto", padding: "10px 14px" }}
                 >
                   Clear selection
                 </button>
               ) : null}
             </div>
+          </div>
 
-            <div className="label">Select Route</div>
-
+          <div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">Select Route</div>
             {routesLoading ? (
-              <div className="skel skel-line lg" style={{ height: 40 }} />
+              <div className="h-10 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg transition-colors duration-300" />
             ) : (
               <select
-                className="select"
+                className="w-full bg-white/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 dark:text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0b4ea2] dark:focus:ring-blue-400 transition-shadow drop-shadow-sm cursor-pointer"
                 value={selectedRouteId}
                 onChange={(e) => setSelectedRouteId(e.target.value)}
               >
@@ -422,86 +483,103 @@ export default function LiveMap() {
                 ) : (
                   routes.map((r) => (
                     <option key={r.routeId} value={r.routeId}>
-                      {r.routeId} — {r.name}
+                      {r.routeId} &mdash; {r.name}
                     </option>
                   ))
                 )}
               </select>
             )}
-
             {routesError && (
-              <div style={{ marginTop: 10, color: "#b91c1c", fontSize: 12 }}>
-                Routes error: {routesError}
-              </div>
+              <div className="mt-2 text-rose-600 dark:text-rose-400 text-sm">{routesError}</div>
             )}
+          </div>
 
-            <div className="divider" />
+          <div className="h-px bg-slate-200/80 dark:bg-slate-700 my-2 transition-colors duration-300" />
 
-            <div className="muted">
-              Stops: <b>{safeStops.length}</b> · Buses: <b>{visibleBuses.length}</b>
-              {busesSyncing ? <span style={{ marginLeft: 8 }}>· Syncing…</span> : null}
+          <div className="flex flex-col gap-2">
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 transition-colors duration-300 flex justify-between">
+              <span>Route Stops ({safeStops.length})</span>
+              {busesSyncing ? <span className="text-emerald-600 dark:text-emerald-400 animate-pulse font-normal">&middot; Syncing&hellip;</span> : null}
             </div>
+            <ul className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+              {safeStops.length === 0 ? (
+                <li className="text-xs text-slate-500 italic">No stops data.</li>
+              ) : (
+                safeStops.map((s) => (
+                  <li
+                    key={s.stopId}
+                    className="text-sm text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 cursor-default transition-colors flex items-center gap-2"
+                    onMouseEnter={() => setHoveredStopId(s.stopId)}
+                    onMouseLeave={() => setHoveredStopId(null)}
+                  >
+                    <span className="w-5 h-5 rounded-full bg-[#0b4ea2] dark:bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {s.sequence}
+                    </span>
+                    <span className="truncate">{s.name_en}</span>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
 
-            <div className="divider" />
+          <div className="h-px bg-slate-200/80 dark:bg-slate-700 my-2 transition-colors duration-300" />
 
-            <div className="label">Selected bus</div>
+          <div>
+            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">Selected bus</div>
             {!selectedBusId ? (
-              <div className="muted">Click a bus marker or choose one from the list.</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400 italic transition-colors duration-300">Click a bus marker or choose one from the list.</div>
             ) : selectedBusLoading ? (
-              <div className="skel-card">
-                <div className="skel skel-line md"></div>
-                <div className="skel skel-line lg"></div>
-                <div className="skel skel-line sm"></div>
+              <div className="flex flex-col gap-2 p-4 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 drop-shadow-sm transition-colors duration-300">
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 animate-pulse rounded w-1/2" />
+                <div className="h-4 bg-slate-300 dark:bg-slate-600 animate-pulse rounded w-3/4" />
               </div>
             ) : selectedBusError ? (
-              <div style={{ color: "#b91c1c", fontSize: 12 }}>{selectedBusError}</div>
+              <div className="text-rose-600 dark:text-rose-400 text-sm bg-rose-50 dark:bg-rose-900/30 p-2 rounded border border-rose-100 dark:border-rose-800 transition-colors duration-300">{selectedBusError}</div>
             ) : selectedBus ? (
-              <div className="item" style={{ flexDirection: "column" }}>
-                <b>{selectedBus.busId}</b>
-                <div className="kv">Route: {selectedBus.routeId || "—"}</div>
-                <div className="kv">Speed: {selectedBus.speed ?? 0} km/h</div>
-                <div className="kv">
+              <div className="flex flex-col gap-1.5 p-4 bg-white/70 dark:bg-slate-800/80 rounded-xl border border-blue-100 dark:border-slate-600 shadow-sm transition-colors duration-300">
+                <b className="text-[#0b4ea2] dark:text-blue-300 text-lg leading-tight transition-colors duration-300">{selectedBus.busId}</b>
+                <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Route: <span className="font-medium text-slate-800 dark:text-slate-200">{selectedBus.routeId || "—"}</span></div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Speed: <span className="font-medium text-emerald-600 dark:text-emerald-400">{selectedBus.speed ?? 0} km/h</span></div>
+                <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">
                   Updated: {selectedBus.timestamp ? new Date(selectedBus.timestamp).toLocaleTimeString() : "—"}
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <Link to={`/bus/${encodeURIComponent(selectedBus.busId)}`}>Open details →</Link>
+                <div className="mt-3">
+                  <Link className="inline-block text-[#0b4ea2] dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors border-b border-transparent hover:border-blue-800 dark:hover:border-blue-300 pb-0.5" to={`/bus/${encodeURIComponent(selectedBus.busId)}`}>Open details &rarr;</Link>
                 </div>
               </div>
             ) : (
-              <div className="muted">No details available.</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400 transition-colors duration-300">No details available.</div>
             )}
 
             {stopsLoading && (
-              <div className="muted" style={{ marginTop: 6 }}>
-                Loading stops…
-              </div>
+              <div className="mt-2 text-sm text-slate-500 dark:text-slate-400 animate-pulse transition-colors duration-300">Loading stops&hellip;</div>
             )}
-
             {stopsError && (
-              <div style={{ marginTop: 10, color: "#b91c1c", fontSize: 12 }}>
-                Stops error: {stopsError}
-              </div>
+              <div className="mt-2 text-sm text-rose-600 dark:text-rose-400 transition-colors duration-300">Stops error: {stopsError}</div>
             )}
           </div>
         </section>
 
-        {/* MAP */}
-        <section className="card map-card">
-          <div className="card-h">
-            <div className="h">Live Map</div>
-            <div className="muted">{stopsLoading ? "Loading stops…" : "Interactive tracking"}</div>
+        {/* MAIN MAP AREA */}
+        <section className="lg:col-span-6 flex flex-col h-[500px] lg:h-[calc(100vh-8rem)] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl overflow-hidden relative max-lg:order-2 z-0 transition-colors duration-300">
+          <div className="p-5 bg-white/60 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-10 transition-colors duration-300">
+            <div>
+              <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Live Map</h2>
+              <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">{stopsLoading ? "Loading stops…" : "Interactive tracking"}</div>
+            </div>
           </div>
 
-          <div className="map-wrap">
+          <div className="flex-1 relative z-0 mix-blend-normal">
             <MapContainer
               center={mapCenter}
               zoom={13}
               whenCreated={(map) => (mapRef.current = map)}
-              style={{ height: "100%", width: "100%" }}
+              style={{ height: "100%", width: "100%", background: "transparent" }}
             >
               <TileLayer
                 attribution="&copy; OpenStreetMap contributors"
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                className="dark:brightness-75 dark:contrast-125 dark:hue-rotate-180 dark:invert"
               />
 
               {/* Route Polyline */}
@@ -513,140 +591,370 @@ export default function LiveMap() {
                     weight: 5,
                     opacity: 0.85,
                     lineJoin: "round",
+                    dashArray: "10, 10"
                   }}
                 />
               )}
 
               {/* Stops */}
               {safeStops.map((s) => (
-                <CircleMarker key={s.stopId} center={[s.lat, s.lng]} radius={6}>
-                  <Popup>
-                    <div>
-                      <div style={{ fontWeight: 800 }}>{s.name_en}</div>
-                      <div style={{ fontSize: 12, opacity: 0.7 }}>
-                        {s.stopId} · Route {s.routeId} · #{s.sequence}
-                      </div>
-                    </div>
-                  </Popup>
-                </CircleMarker>
-              ))}
-
-              {/* Buses */}
-              {visibleBuses.map((b) => (
-                <BusMarker
-                  key={b.busId}
-                  position={[b.lat, b.lng]}
+                <StopMarker
+                  key={s.stopId}
+                  position={[s.lat, s.lng]}
+                  sequence={s.sequence}
+                  isHovered={hoveredStopId === s.stopId}
                   eventHandlers={{
-                    add: (e) => (busMarkerRefs.current[b.busId] = e.target),
-                    click: () => setSelectedBusId(b.busId),
+                    click: () => {
+                      setSelectedBusId(null);
+                      setActiveLocationTracker({ lat: s.lat, lng: s.lng, title: `Stop: ${s.name_en}` });
+                      setShowStreetViewPanel(true);
+                    }
                   }}
                 >
                   <Popup>
                     <div>
-                      <div style={{ fontWeight: 800 }}>{b.busId}</div>
-                      {b.routeId && <div>Route: {b.routeId}</div>}
-                      <div>Speed: {b.speed ?? 0}</div>
-                      <div style={{ fontSize: 12, opacity: 0.8 }}>
-                        {b.timestamp ? new Date(b.timestamp).toLocaleString() : "N/A"}
-                      </div>
-                      <div style={{ marginTop: 8 }}>
-                        <Link to={`/bus/${encodeURIComponent(b.busId)}`}>Open details →</Link>
+                      <div className="font-bold text-slate-800">{s.name_en}</div>
+                      <div className="text-xs text-slate-600 mt-1">
+                        {s.stopId} &middot; Route {s.routeId} &middot; #{s.sequence}
                       </div>
                     </div>
                   </Popup>
-                </BusMarker>
+                </StopMarker>
               ))}
+
+              {/* Buses */}
+              <MarkerClusterGroup chunkedLoading={true} maxClusterRadius={50}>
+                {filteredBuses.map((b) => (
+                  <BusMarker
+                    key={b.busId}
+                    position={[b.lat, b.lng]}
+                    heading={b.heading}
+                    busStatus={b.busStatus || "On Route"}
+                    eventHandlers={{
+                      add: (e) => (busMarkerRefs.current[b.busId] = e.target),
+                      click: () => {
+                        setSelectedBusId(b.busId);
+                        setActiveLocationTracker({ lat: b.lat, lng: b.lng, title: `Bus ${b.busId}` });
+                      },
+                    }}
+                  >
+                    <Popup>
+                      <div>
+                        <div className="font-bold text-[#0b4ea2] text-md">{b.busId}</div>
+                        {b.routeId && <div className="text-sm text-slate-700">Route: {b.routeId}</div>}
+                        <div className="text-sm text-slate-700">Speed: <span className="text-emerald-600 font-medium">{b.speed ?? 0} km/h</span></div>
+                        <div className="text-xs text-slate-500 mt-1 pt-1 border-t border-slate-100">
+                          {b.timestamp ? new Date(b.timestamp).toLocaleString() : "N/A"}
+                        </div>
+                        <div className="mt-2">
+                          <Link className="text-[#0b4ea2] font-medium hover:underline text-sm" to={`/bus/${encodeURIComponent(b.busId)}`}>Open details &rarr;</Link>
+                        </div>
+                      </div>
+                    </Popup>
+                  </BusMarker>
+                ))}
+              </MarkerClusterGroup>
             </MapContainer>
+
+            {/* STREET VIEW MAP CONTROL BUTTON */}
+            <div className="absolute top-4 right-4 z-[400]">
+              <button
+                onClick={() => setShowStreetViewPanel(!showStreetViewPanel)}
+                className={`p-2.5 rounded-xl shadow-md border backdrop-blur-md transition-all ${showStreetViewPanel ? "bg-[#0b4ea2] border-blue-400 text-white" : "bg-white/90 dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700"}`}
+                title="Toggle Street View"
+              >
+                <Camera size={20} />
+              </button>
+            </div>
+
+            {/* STREET VIEW FLOATING PANEL */}
+            <AnimatePresence>
+              {showStreetViewPanel && activeLocationTracker && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute bottom-6 left-6 z-[400] w-72 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+                >
+                  <div className="bg-[#0b4ea2] px-3 py-2 flex justify-between items-center text-white">
+                    <div className="flex items-center gap-1.5 font-semibold text-sm">
+                      <Camera size={14} />
+                      Street View Tracker
+                    </div>
+                    <button onClick={() => setShowStreetViewPanel(false)} className="hover:bg-white/20 p-1 rounded transition-colors"><X size={14} /></button>
+                  </div>
+                  <div className="relative aspect-[4/3] bg-slate-200 dark:bg-slate-900 w-full flex items-center justify-center">
+                    <img
+                      src={`https://images.unsplash.com/photo-1544620347-c4cb45fc81b9?auto=format&fit=crop&w=600&q=80`}
+                      className="w-full h-full object-cover mix-blend-overlay dark:mix-blend-normal opacity-90"
+                      alt="Street View proxy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 p-3 w-full">
+                      <div className="text-white font-bold text-sm drop-shadow-md truncate">{activeLocationTracker.title}</div>
+                      <div className="text-white/80 text-[11px] font-medium drop-shadow-md tracking-wider">
+                        {activeLocationTracker.lat.toFixed(5)}, {activeLocationTracker.lng.toFixed(5)}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </section>
 
-        {/* RIGHT PANEL */}
-        <section className="card right-panel">
-          <div className="card-h">
-            <div className="h">Live Buses</div>
-            <div className="muted">Auto-refresh every 5 seconds</div>
+        {/* RIGHT PANEL (LIVE BUSES) */}
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-8rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-3 z-10 transition-colors duration-300">
+          <div className="flex justify-between items-start gap-2">
+            <div>
+              <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300 whitespace-nowrap">Live Buses</h2>
+              <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Active tracking via sync</div>
+            </div>
+            <label className="flex items-center gap-1.5 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-300 select-none mt-1 whitespace-nowrap group">
+              <span className={`transition-opacity ${autoRefresh ? "opacity-100" : "opacity-0"}`} aria-hidden="true">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+              </span>
+              <span className="hidden sm:inline">Auto-refresh</span>
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={autoRefresh}
+                onChange={() => setAutoRefresh(!autoRefresh)}
+              />
+              <div className={`w-9 h-5 rounded-full relative transition-colors ${autoRefresh ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-600"}`}>
+                <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] transition-all duration-200 shadow-sm ${autoRefresh ? "left-[19px]" : "left-[3px]"}`} />
+              </div>
+            </label>
           </div>
 
-          <div className="card-b">
-            <input
-              className="input"
-              placeholder="Search bus ID (e.g. BUS-101)"
-              value={busQuery}
-              onChange={(e) => setBusQuery(e.target.value)}
-              style={{ marginBottom: 10 }}
-            />
-
-            {/* ✅ show error always */}
-            {busesError && (
-              <div style={{ marginBottom: 10, color: "#b91c1c", fontSize: 12 }}>
-                Buses error: {busesError}
-              </div>
-            )}
-
-            <div className="list">
-              {busesFirstLoad ? (
-                <>
-                  <div className="skel-card">
-                    <div className="skel skel-line md"></div>
-                    <div className="skel skel-line lg"></div>
-                    <div className="skel skel-line sm"></div>
-                  </div>
-                  <div className="skel-card">
-                    <div className="skel skel-line md"></div>
-                    <div className="skel skel-line lg"></div>
-                    <div className="skel skel-line sm"></div>
-                  </div>
-                  <div className="skel-card">
-                    <div className="skel skel-line md"></div>
-                    <div className="skel skel-line lg"></div>
-                    <div className="skel skel-line sm"></div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {filteredBuses.slice(0, 12).map((b) => (
-                    <div
-                      key={b.busId}
-                      className="item"
-                      style={{
-                        cursor: "pointer",
-                        borderColor: b.busId === selectedBusId ? "rgba(11,78,162,0.65)" : undefined,
-                      }}
-                      onClick={() => focusBus(b)}
-                    >
-                      <div>
-                        <b>{b.busId}</b>
-                        <div className="kv">Speed: {b.speed ?? 0}</div>
-                        <div className="kv">
-                          Last: {b.timestamp ? new Date(b.timestamp).toLocaleTimeString() : "N/A"}
+          <div>
+            <div className="flex gap-2 mb-3">
+              {["All", "Active", "Stopped"].map(f => (
+                <button
+                  key={f}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full border transition-colors ${busFilter === f ? "bg-[#0b4ea2] text-white border-[#0b4ea2] dark:bg-blue-500 dark:border-blue-500 shadow-inner" : "bg-white/50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-slate-700 shadow-sm"}`}
+                  onClick={() => setBusFilter(f)}
+                >{f}</button>
+              ))}
+            </div>
+            <div className="relative">
+              <input
+                className="w-full bg-white/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 dark:text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0b4ea2] dark:focus:ring-blue-400 transition-shadow drop-shadow-sm placeholder-slate-400"
+                placeholder="Search bus ID..."
+                value={busQuery}
+                onChange={(e) => setBusQuery(e.target.value)}
+              />
+              <AnimatePresence>
+                {busQuery && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden z-20 max-h-60 overflow-y-auto"
+                  >
+                    {filteredBuses.slice(0, 8).map(b => (
+                      <div key={b.busId} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b last:border-0 border-slate-100 dark:border-slate-700/50 flex justify-between items-center transition-colors" onClick={() => { focusBus(b); setBusQuery(""); }}>
+                        <span className="font-semibold text-slate-800 dark:text-slate-200">{b.busId}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`w-2.5 h-2.5 rounded-full ${b.busStatus === "Out of Service" ? "bg-slate-500" : b.busStatus === "Stopped" || b.speed === 0 ? "bg-rose-500" : "bg-emerald-500"}`}></span>
+                          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{b.busStatus || (b.speed > 0 ? "En route" : "Stopped")}</span>
                         </div>
                       </div>
+                    ))}
+                    {filteredBuses.length === 0 && <div className="p-4 text-sm font-medium text-center text-slate-500 dark:text-slate-400">No buses match "{busQuery}"</div>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {busesError && (
+            <div className="text-rose-600 dark:text-rose-400 text-sm bg-rose-50 dark:bg-rose-900/30 p-3 rounded-lg border border-rose-100 dark:border-rose-800 transition-colors duration-300">
+              {busesError}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            {busesFirstLoad ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-2 p-4 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 drop-shadow-sm transition-colors duration-300">
+                  <div className="h-4 bg-slate-200 dark:bg-slate-700 animate-pulse rounded w-1/2 transition-colors duration-300" />
+                  <div className="h-4 bg-slate-300 dark:bg-slate-600 animate-pulse rounded w-3/4 transition-colors duration-300" />
+                </div>
+              ))
+            ) : (
+              <>
+                <AnimatePresence mode="popLayout">
+                  {filteredBuses.slice(0, 12).map((b) => (
+                    <motion.div
+                      layout
+                      initial={{ opacity: 0, y: -15, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      key={b.busId}
+                      className={`p-4 rounded-xl border transition-all cursor-pointer bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 shadow-sm hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] ${b.busId === selectedBusId ? "ring-2 ring-[#0b4ea2] dark:ring-blue-400 border-transparent dark:border-transparent" : "hover:border-[#0b4ea2]/50 dark:hover:border-blue-400/50"}`}
+                      onClick={() => focusBus(b)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <b className="text-slate-800 dark:text-slate-200 text-lg transition-colors duration-300">{b.busId}</b>
+                          <div className="flex items-center gap-1.5 mt-1 transition-colors duration-300">
+                            <span className={`w-2 h-2 rounded-full ${b.busStatus === "Out of Service" ? "bg-slate-500" : b.busStatus === "Stopped" || b.speed === 0 ? "bg-rose-500" : "bg-emerald-500"}`}></span>
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                              {b.busStatus || (b.speed > 0 ? "On Route" : "Stopped")}
+                            </span>
+                            <span className="text-sm text-slate-400 dark:text-slate-500 ml-1">
+                              ({b.speed ?? 0} km/h)
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300 line-clamp-1">
+                            Dest: Mohali ISBT (Simulated)
+                          </div>
+                        </div>
                         <Link
+                          className="text-[#0b4ea2] dark:text-blue-300 bg-blue-50/50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800/50 p-2 rounded-lg transition-colors border border-blue-100 dark:border-blue-800 hover:-translate-y-0.5 hover:shadow-sm active:scale-95 duration-200"
                           to={`/bus/${encodeURIComponent(b.busId)}`}
                           onClick={(e) => e.stopPropagation()}
+                          title="Open Details"
                         >
-                          Open →
+                          &rarr;
                         </Link>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
+                </AnimatePresence>
 
-                  {filteredBuses.length === 0 && (
-                    <div className="muted">
-                      No live buses found{busQuery ? " for this search." : " yet."}
-                      <br />
-                      {busQuery
-                        ? "Try a different bus ID."
-                        : "Send GPS updates to see buses on map."}
-                    </div>
-                  )}
-                </>
-              )}
+                {filteredBuses.length === 0 && (
+                  <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-8 px-4 bg-white/40 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 border-dashed transition-colors duration-300">
+                    No live buses found{busQuery ? " for this search." : " yet."}
+                    <br className="mt-2" />
+                    {busQuery
+                      ? "Try a different ID."
+                      : "Waiting for GPS data..."}
+                  </div>
+                )}
+              </>
+            )}
+            {/* STREET VIEW PLACEHOLDER */}
+            <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
+              <h3 className="text-sm font-bold text-[#0b4ea2] dark:text-blue-300 mb-3 uppercase tracking-wider transition-colors duration-300">Street View</h3>
+              <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-inner relative flex items-center justify-center transition-colors duration-300">
+                {selectedBusId ? (
+                  <img
+                    src={`https://images.unsplash.com/photo-1544620347-c4cb45fc81b9?auto=format&fit=crop&w=600&q=80`}
+                    alt="Street view placeholder"
+                    className="w-full h-full object-cover opacity-80 mix-blend-overlay dark:mix-blend-normal"
+                  />
+                ) : (
+                  <span className="text-sm text-slate-500 dark:text-slate-400 font-medium px-4 text-center transition-colors duration-300">Select a bus for Street View</span>
+                )}
+              </div>
             </div>
           </div>
         </section>
+
+        {/* FLOATING TELEMETRY DASHBOARD */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-4xl px-4">
+          <AnimatePresence>
+            {selectedBus && (
+              <motion.div
+                initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
+                className="bg-[#0b4ea2]/95 dark:bg-slate-900/95 backdrop-blur-xl text-white border border-blue-400/30 dark:border-slate-700 shadow-2xl rounded-2xl p-5 flex flex-col gap-4 pointer-events-auto"
+              >
+                {/* Header Container */}
+                <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/10 p-2 rounded-xl">
+                      <MapPin size={24} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-xs text-blue-200 dark:text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Live Telemetry &bull; Route {selectedBus.routeId}</div>
+                      <div className="text-2xl font-bold leading-none">{selectedBus.busId}</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10 mb-1">
+                      <div className={`w-2.5 h-2.5 rounded-full ${selectedBus.speed > 0 ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`}></div>
+                      <span className="text-sm font-medium">{selectedBus.speed > 0 ? "En route" : "Stopped"}</span>
+                    </div>
+                    <button onClick={() => setSelectedBusId(null)} className="text-xs text-blue-200 hover:text-white transition-colors underline">Close Dashboard</button>
+                  </div>
+                </div>
+
+                {/* Grid Wrapper */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                  {/* WIDGET 1: Speed Gauge */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col items-center justify-center relative">
+                    <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider absolute top-3 left-4">Current Speed</span>
+                    <div className="relative w-24 h-24 mt-4 flex items-center justify-center">
+                      <svg className="w-full h-full transform -rotate-90 pointer-events-none">
+                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
+                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent"
+                          strokeDasharray="251.2"
+                          strokeDashoffset={251.2 - ((Math.min(selectedBus.speed || 0, 80) / 80) * 251.2)}
+                          className={`transition-all duration-1000 ease-out ${selectedBus.speed < 30 ? 'text-emerald-400' : selectedBus.speed <= 60 ? 'text-amber-400' : 'text-rose-500'}`}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-2xl font-black shadow-black drop-shadow-md">{selectedBus.speed || 0}</span>
+                        <span className="text-[10px] text-white/70 font-medium tracking-wide">km/h</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* WIDGET 2: LineChart History */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col items-start justify-center col-span-1 md:col-span-2 relative h-36">
+                    <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider mb-2">Pace Analytics (5 min)</span>
+                    <div className="w-full h-full flex-1">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={speedHistoryMap[selectedBus.busId] || []}>
+                          <YAxis hide domain={[0, 80]} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }}
+                            itemStyle={{ color: '#34d399' }}
+                            labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
+                          />
+                          <Line type="monotone" dataKey="speed" stroke="#34d399" strokeWidth={3} dot={false} activeDot={{ r: 4, fill: '#fff' }} isAnimationActive={true} animationDuration={500} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* WIDGET 3: Next Stops & Progress Tracker */}
+                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col relative h-36 overflow-hidden">
+                    <div className="flex justify-between items-center mb-2 z-10 w-full">
+                      <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider">Upcoming Stops</span>
+                      <span className="text-white/60 text-[10px] uppercase font-bold tracking-wider">ETA</span>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-1.5 z-10 w-full mb-2">
+                      {safeStops.slice(0, 3).map((st, i) => (
+                        <div key={st.stopId} className="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 shadow-inner">
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 rounded-full bg-blue-500 text-[9px] font-bold flex items-center justify-center shrink-0">{st.sequence}</div>
+                            <span className="text-xs font-medium truncate max-w-[80px]" title={st.name_en}>{st.name_en}</span>
+                          </div>
+                          <span className="text-emerald-400 text-[11px] font-bold">+{i * 4 + 2}m</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Background Progress bar visual mock mapped off a 65% standard distance parameter */}
+                    <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/10" title="Trip Progress (Simulated)">
+                      <div className="h-full bg-emerald-500 rounded-r-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" style={{ width: '65%' }}></div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
       </motion.main>
     </div>
   );
