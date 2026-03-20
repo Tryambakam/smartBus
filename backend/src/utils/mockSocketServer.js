@@ -6,12 +6,16 @@ async function initMockData() {
   try {
     const buses = await BusLatest.find({}).lean();
     if (buses.length > 0) {
-      activeBuses = buses.map(b => ({
-        ...b,
-        speed: b.speed || 0,
-        heading: Math.floor(Math.random() * 360),
-        nextStop: "Mocking location..."
-      }));
+      activeBuses = buses.map(b => {
+        const occs = ["Low", "Medium", "High"];
+        return {
+          ...b,
+          speed: b.speed || 0,
+          heading: Math.floor(Math.random() * 360),
+          nextStop: "Mocking location...",
+          occupancy: occs[Math.floor(Math.random() * occs.length)]
+        };
+      });
       console.log(`[Socket Mock] Initialized ${activeBuses.length} buses for simulation.`);
     }
   } catch (err) {
@@ -37,6 +41,12 @@ function startMockStream(io) {
       let newLng = b.lng;
       let newHeading = b.heading;
       let nextStop = b.nextStop;
+      
+      let occ = b.occupancy || "Low";
+      if (Math.random() > 0.9) { // 10% chance to organically shift occupancy
+         const occs = ["Low", "Medium", "High"];
+         occ = occs[Math.floor(Math.random() * occs.length)];
+      }
 
       if (isMoving) {
         newSpeed = Math.floor(Math.random() * 40) + 10;
@@ -67,6 +77,7 @@ function startMockStream(io) {
         speed: newSpeed,
         heading: newHeading,
         nextStop: nextStop,
+        occupancy: occ,
         timestamp: new Date()
       };
     });

@@ -8,7 +8,9 @@ import {
   Moon,
   Globe,
   ChevronDown,
+  Bell
 } from "lucide-react";
+import SmartBusLogo from "./SmartBusLogo";
 import { clearSession, getAuthToken } from "../api";
 
 export default function GovHeader({
@@ -16,6 +18,8 @@ export default function GovHeader({
   backendOk,
   onToggleTheme = () => {},
   themeLabel = "day",
+  unreadNoticesCount = 0,
+  onOpenNotices = () => {}
 }) {
   const { t, i18n } = useTranslation();
   const nav = useNavigate();
@@ -24,76 +28,93 @@ export default function GovHeader({
   const setLang = (lng) => i18n.changeLanguage(lng);
 
   return (
-    <header className="gov-header" role="banner">
-      <div className="gov-header-row">
-        {/* Brand */}
-        <div className="gov-brand" aria-label="smartBus brand">
-          <div className="gov-logo" aria-hidden="true">
-            <Bus size={22} />
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-[#0B1E33]/80 border-b border-slate-200 dark:border-white/10 shadow-sm transition-colors duration-300" role="banner">
+      <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
+        
+        {/* Premium Brand */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 flex items-center justify-center -ml-1">
+            <SmartBusLogo className="w-12 h-12 drop-shadow-md transition-transform hover:scale-105 duration-300" />
           </div>
-
-          <div className="gov-title">
-            <div className="dept">{t("app.dept")}</div>
-            <div className="app">
-              <b>{t("app.name")}</b> — {t("app.tagline")}
+          <div className="flex flex-col">
+            <div className="text-[10px] font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase leading-none mb-1">
+              {t("app.dept")}
+            </div>
+            <div className="text-xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-2">
+              <span>{t("app.name")}</span>
+              <span className="text-sm font-medium text-slate-400 dark:text-slate-500 tracking-normal hidden sm:inline-block">— {t("app.tagline")}</span>
             </div>
           </div>
         </div>
 
-        {/* Right cluster */}
-        <div className="gov-right flex items-center justify-end w-full">
-          {/* Actions */}
-          <div className="gov-actions" aria-label="actions">
-            {/* Language */}
-            <div className="relative flex items-center bg-white/10 hover:bg-white/20 px-2.5 py-1.5 rounded-lg border border-white/20 transition-colors" title="Select Language">
-              <Globe size={14} style={{ opacity: 0.9 }} className="mr-1.5" />
-              <select 
-                className="bg-transparent text-sm font-bold outline-none cursor-pointer appearance-none pr-4 text-inherit uppercase"
-                value={i18n.language.split('-')[0]}
-                onChange={(e) => setLang(e.target.value)}
-              >
-                <option value="en" className="text-slate-800">EN</option>
-                <option value="hi" className="text-slate-800">HI</option>
-                <option value="pa" className="text-slate-800">PA</option>
-              </select>
-              <ChevronDown size={12} className="absolute right-1.5 opacity-70 pointer-events-none" />
-            </div>
-
-            {/* Theme */}
-            <button className="icon-btn" onClick={onToggleTheme} aria-label="Toggle theme">
-              {themeLabel === "night" ? <Moon size={16} /> : <Sun size={16} />}
-              <span className="icon-btn-text">
-                {themeLabel === "night" ? t("app.night") : t("app.day")}
-              </span>
-            </button>
-
-            {/* Auth */}
-            {isAuthed ? (
-              <>
-                <Link className="icon-btn" to="/operator" aria-label="Operator demo">
-                  <Bus size={16} />
-                  <span className="icon-btn-text">Operator</span>
-                </Link>
-                <button
-                  className="icon-btn"
-                  onClick={() => {
-                    clearSession();
-                    nav("/welcome");
-                  }}
-                  aria-label="Logout"
-                >
-                  <LogOut size={16} />
-                  <span className="icon-btn-text">Logout</span>
-                </button>
-              </>
-            ) : (
-              <Link className="icon-btn" to="/login" aria-label="Login">
-                <LogIn size={16} />
-                <span className="icon-btn-text">{t("app.login")}</span>
-              </Link>
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          
+          {/* Notifications Bell */}
+          <button
+            onClick={onOpenNotices}
+            className="relative p-2 text-slate-500 hover:text-[#0b4ea2] dark:text-slate-400 dark:hover:text-blue-400 bg-slate-50/50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0b4ea2]/50"
+            title="Public Notices"
+          >
+            <Bell size={20} strokeWidth={2.5} />
+            {unreadNoticesCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-[#0B1E33] animate-pulse"></span>
             )}
+          </button>
+
+          {/* Language Component */}
+          <div className="relative flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 px-3 py-1.5 rounded-xl transition-all font-medium text-sm text-slate-700 dark:text-slate-300 group cursor-pointer" title="Select Language">
+            <Globe size={16} className="mr-2 text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+            <select 
+              className="bg-transparent font-bold outline-none cursor-pointer appearance-none pr-4 uppercase"
+              value={i18n.language.split('-')[0]}
+              onChange={(e) => setLang(e.target.value)}
+            >
+              <option value="en" className="text-slate-800 dark:text-slate-800">EN</option>
+              <option value="hi" className="text-slate-800 dark:text-slate-800">HI</option>
+              <option value="pa" className="text-slate-800 dark:text-slate-800">PA</option>
+            </select>
+            <ChevronDown size={14} className="absolute right-2 opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
           </div>
+
+          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
+
+          {/* Theme Toggle */}
+          <button 
+            className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 px-3 py-2 rounded-xl transition-all font-medium text-sm text-slate-700 dark:text-slate-300"
+            onClick={onToggleTheme} 
+            aria-label="Toggle theme"
+          >
+            {themeLabel === "night" ? <Moon size={18} className="text-blue-400" /> : <Sun size={18} className="text-amber-500" />}
+            <span className="hidden sm:inline-block">{themeLabel === "night" ? t("app.night") : t("app.day")}</span>
+          </button>
+
+          {/* Auth Controls */}
+          {isAuthed ? (
+            <>
+              <Link className="flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-xl transition-all font-semibold text-sm border border-transparent hover:border-blue-200 dark:hover:border-blue-800" to="/operator">
+                <Bus size={18} />
+                <span className="hidden sm:inline-block">Operator</span>
+              </Link>
+              <button
+                className="flex items-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 px-3 py-2 rounded-xl transition-all font-semibold text-sm border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
+                onClick={() => {
+                  clearSession();
+                  nav("/welcome");
+                }}
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline-block">Logout</span>
+              </button>
+            </>
+          ) : (
+            <Link className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all font-semibold text-sm shadow-md shadow-blue-600/20 hover:shadow-lg hover:-translate-y-0.5" to="/login">
+              <LogIn size={18} />
+              <span className="hidden sm:inline-block">{t("app.login")}</span>
+            </Link>
+          )}
         </div>
+        
       </div>
     </header>
   );

@@ -5,15 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Popup, CircleMarker, Polyline } from "react-leaflet";
 import { Link } from "react-router-dom";
-import { RefreshCw, MapPin, Camera, X } from "lucide-react";
+import { RefreshCw, MapPin, Camera, X, Users, Info, Bell, AlertCircle } from "lucide-react";
 import L from "leaflet";
+import { PUBLIC_NOTICES } from "../data/notices";
 
 import GovHeader from "../components/GovHeader";
 import AlertsBar from "../components/AlertsBar";
 import BusMarker from "../components/BusMarker";
 import StopMarker from "../components/StopMarker";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { ResponsiveContainer, LineChart, Line, YAxis, Tooltip } from "recharts";
+import { ResponsiveContainer, LineChart, Line, YAxis, Tooltip, BarChart, Bar, XAxis, Cell } from "recharts";
 import useDebounce from "../hooks/useDebounce";
 import { getBusLatest, getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
 import { io as ioClient } from "socket.io-client";
@@ -48,6 +49,21 @@ export default function LiveMap() {
   // const { t } = useTranslation(); // safe even if unused
   const { theme, toggleTheme } = useTheme();
 
+  // Mock Data for Prediction Accuracy
+  const accuracyData = [
+    { time: "08:15", delay: 0 },
+    { time: "08:30", delay: 2 },
+    { time: "08:45", delay: 7 },
+    { time: "09:00", delay: 0 },
+    { time: "09:15", delay: 3 }
+  ];
+
+  const getAccuracyColor = (delay) => {
+    if (delay <= 1) return "#10b981"; // Emerald
+    if (delay <= 5) return "#f59e0b"; // Amber
+    return "#e11d48"; // Rose
+  };
+
   const [showNotice, setShowNotice] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [busFilter, setBusFilter] = useState("All");
@@ -66,8 +82,25 @@ export default function LiveMap() {
   const [routes, setRoutes] = useState([]);
   const [selectedRouteId, setSelectedRouteId] = useState("");
   const [stops, setStops] = useState([]);
-
   const [status, setStatus] = useState("Loading…");
+
+  const [dismissedNotices, setDismissedNotices] = useState(() => {
+    try {
+      const stored = localStorage.getItem("smartBus_dismissed_notices");
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
+
+  const activeNotices = useMemo(() => {
+    return PUBLIC_NOTICES.filter(n => !dismissedNotices.includes(n.id));
+  }, [dismissedNotices]);
+
+  const dismissNotice = (id) => {
+    const next = [...dismissedNotices, id];
+    setDismissedNotices(next);
+    localStorage.setItem("smartBus_dismissed_notices", JSON.stringify(next));
+  };
 
   const [routesError, setRoutesError] = useState("");
   const [stopsError, setStopsError] = useState("");
@@ -404,27 +437,11 @@ export default function LiveMap() {
         backendOk={backendOk}
         onToggleTheme={toggleTheme}
         themeLabel={theme === "dark" ? "night" : "day"}
+        unreadNoticesCount={activeNotices.length}
+        onOpenNotices={() => setShowNoticeModal(true)}
       />
 
-      <div className="bg-[#0b4ea2] dark:bg-slate-900/80 dark:border-b dark:border-white/10 text-white text-sm py-2 px-4 shadow-md text-center z-20 relative transition-colors duration-300">
-        🔒 Secure view: Live tracking is available only to authorized account holders.
-      </div>
-
-      {showNotice && (
-        <div className="bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm py-2 px-4 shadow-sm relative flex justify-center items-center gap-2 transition-colors duration-300 z-20">
-          <span className="font-bold shrink-0">Public Notice &mdash;</span>
-          <span>Live bus location is for public information. Accuracy may vary based on GPS/network.</span>
-          <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 transition-colors"
-            onClick={() => setShowNotice(false)}
-            aria-label="Dismiss notice"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      <AlertsBar alerts={alerts} />
+      {/* AlertsBar successfully removed */}
 
       <motion.main
         className="flex-1 w-full max-w-[1600px] mx-auto p-4 flex flex-col lg:grid lg:grid-cols-12 gap-6 relative"
@@ -432,8 +449,45 @@ export default function LiveMap() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
+        <AnimatePresence>
+          {activeNotices.map((notice) => (
+            <motion.div
+              key={notice.id}
+              initial={{ opacity: 0, height: 0, scale: 0.95 }}
+              animate={{ opacity: 1, height: "auto", scale: 1 }}
+              exit={{ opacity: 0, height: 0, scale: 0.95, overflow: "hidden" }}
+              transition={{ duration: 0.3 }}
+              className="col-span-12"
+            >
+              <div className={`relative px-4 py-3 rounded-xl shadow-md border flex items-start gap-3 backdrop-blur-md ${
+                notice.type === 'warning' ? 'bg-amber-50/90 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800/50' :
+                'bg-blue-50/90 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800/50'
+              }`}>
+                <div className={`mt-0.5 ${notice.type === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  {notice.type === 'warning' ? <AlertCircle size={20} /> : <Info size={20} />}
+                </div>
+                <div className="flex-1">
+                  <h4 className={`text-sm font-bold ${notice.type === 'warning' ? 'text-amber-800 dark:text-amber-200' : 'text-blue-800 dark:text-blue-200'}`}>
+                    {notice.title}
+                  </h4>
+                  <p className={`text-sm mt-0.5 ${notice.type === 'warning' ? 'text-amber-700 dark:text-amber-300' : 'text-blue-700 dark:text-blue-300'}`}>
+                    {notice.message}
+                  </p>
+                </div>
+                <button
+                  onClick={() => dismissNotice(notice.id)}
+                  className={`p-1.5 rounded-lg transition-colors ${notice.type === 'warning' ? 'hover:bg-amber-200/50 text-amber-700 dark:hover:bg-amber-800/50 dark:text-amber-400' : 'hover:bg-blue-200/50 text-blue-700 dark:hover:bg-blue-800/50 dark:text-blue-400'}`}
+                  aria-label="Dismiss Notice"
+                >
+                  <X size={16} strokeWidth={2.5} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
         {/* LEFT PANEL (CONTROLS SIDEBAR) */}
-        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-8rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-1 z-10 transition-colors duration-300">
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-1 z-10 transition-colors duration-300">
           <div>
             <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Controls</h2>
             <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Route & display</div>
@@ -561,7 +615,7 @@ export default function LiveMap() {
         </section>
 
         {/* MAIN MAP AREA */}
-        <section className="lg:col-span-6 flex flex-col h-[500px] lg:h-[calc(100vh-8rem)] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl overflow-hidden relative max-lg:order-2 z-0 transition-colors duration-300">
+        <section className="lg:col-span-6 flex flex-col h-[500px] lg:h-[calc(100vh-5.5rem)] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl overflow-hidden relative max-lg:order-2 z-0 transition-colors duration-300">
           <div className="p-5 bg-white/60 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-10 transition-colors duration-300">
             <div>
               <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Live Map</h2>
@@ -630,6 +684,7 @@ export default function LiveMap() {
                     position={[b.lat, b.lng]}
                     heading={b.heading}
                     busStatus={b.busStatus || "On Route"}
+                    occupancy={b.occupancy}
                     eventHandlers={{
                       add: (e) => (busMarkerRefs.current[b.busId] = e.target),
                       click: () => {
@@ -704,7 +759,7 @@ export default function LiveMap() {
         </section>
 
         {/* RIGHT PANEL (LIVE BUSES) */}
-        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-8rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-3 z-10 transition-colors duration-300">
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-3 z-10 transition-colors duration-300">
           <div className="flex justify-between items-start gap-2">
             <div>
               <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300 whitespace-nowrap">Live Buses</h2>
@@ -799,7 +854,17 @@ export default function LiveMap() {
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <b className="text-slate-800 dark:text-slate-200 text-lg transition-colors duration-300">{b.busId}</b>
+                          <div className="flex items-center gap-2">
+                            <b className="text-slate-800 dark:text-slate-200 text-lg transition-colors duration-300">{b.busId}</b>
+                            <div className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                              b.occupancy === "High" ? "bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400" :
+                              b.occupancy === "Medium" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400" :
+                              "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400"
+                            }`}>
+                              <Users size={12} strokeWidth={2.5} />
+                              {b.occupancy || "Low"}
+                            </div>
+                          </div>
                           <div className="flex items-center gap-1.5 mt-1 transition-colors duration-300">
                             <span className={`w-2 h-2 rounded-full ${b.busStatus === "Out of Service" ? "bg-slate-500" : b.busStatus === "Stopped" || b.speed === 0 ? "bg-rose-500" : "bg-emerald-500"}`}></span>
                             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -837,6 +902,28 @@ export default function LiveMap() {
                 )}
               </>
             )}
+
+            {/* PREDICTION ACCURACY */}
+            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
+              <h3 className="text-sm font-bold text-[#0b4ea2] dark:text-blue-300 mb-1 uppercase tracking-wider transition-colors duration-300">Prediction Accuracy</h3>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 transition-colors duration-300">Past 5 arrivals at ISBT (Sched vs Actual delay in mins)</div>
+              
+              <div className="h-32 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={accuracyData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                    <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '8px', fontSize: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff', color: theme === 'dark' ? '#f8fafc' : '#0f172a' }} />
+                    <Bar dataKey="delay" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                      {accuracyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={getAccuracyColor(entry.delay)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
             {/* STREET VIEW PLACEHOLDER */}
             <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
               <h3 className="text-sm font-bold text-[#0b4ea2] dark:text-blue-300 mb-3 uppercase tracking-wider transition-colors duration-300">Street View</h3>
@@ -956,6 +1043,64 @@ export default function LiveMap() {
         </div>
 
       </motion.main>
+
+      {/* NOTICE HISTORY MODAL */}
+      <AnimatePresence>
+        {showNoticeModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => setShowNoticeModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+                  <Bell size={20} className="text-[#0b4ea2] dark:text-blue-400" />
+                  <h3 className="font-bold text-lg">Notice History</h3>
+                </div>
+                <button
+                  onClick={() => setShowNoticeModal(false)}
+                  className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700">
+                {PUBLIC_NOTICES.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500 font-medium">No notices available.</div>
+                ) : PUBLIC_NOTICES.map(n => (
+                  <div key={n.id} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 shadow-sm relative overflow-hidden group">
+                    <div className={`absolute top-0 left-0 w-1 h-full ${n.type === 'warning' ? 'bg-amber-500' : 'bg-[#0b4ea2] dark:bg-blue-500'}`}></div>
+                    <div className="flex justify-between items-start mb-1 pl-2">
+                       <h4 className="font-bold text-slate-800 dark:text-slate-200">{n.title}</h4>
+                       <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
+                         {new Date(n.date).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                       </span>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 pl-2 mt-1.5 leading-relaxed">{n.message}</p>
+                    {activeNotices.some(a => a.id === n.id) && (
+                      <div className="mt-3 pl-2">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-2 py-0.5 rounded-md">
+                          <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div> Unread Notice
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
