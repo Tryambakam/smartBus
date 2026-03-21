@@ -6,8 +6,8 @@ import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import RequireAuth from "./components/RequireAuth";
 import OperatorDemo from "./pages/OperatorDemo";
-
-
+import DriverDashboard from "./pages/DriverDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 export default function App() {
   return (
     <BrowserRouter>
