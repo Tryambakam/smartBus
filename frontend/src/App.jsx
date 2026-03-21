@@ -8,10 +8,13 @@ import RequireAuth from "./components/RequireAuth";
 import OperatorDemo from "./pages/OperatorDemo";
 import DriverDashboard from "./pages/DriverDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import { AuthProvider } from "./contexts/AuthContext";
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
         <Route path="/" element={<Navigate to="/welcome" replace />} />
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
@@ -41,9 +44,9 @@ export default function App() {
           }
         />
         <Route path="*" element={<Navigate to="/welcome" replace />} />
-
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

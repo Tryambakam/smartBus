@@ -11,7 +11,7 @@ import {
   Bell
 } from "lucide-react";
 import SmartBusLogo from "./SmartBusLogo";
-import { clearSession, getAuthToken } from "../api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function GovHeader({
   lastSyncText,
@@ -23,7 +23,8 @@ export default function GovHeader({
 }) {
   const { t, i18n } = useTranslation();
   const nav = useNavigate();
-  const isAuthed = Boolean(getAuthToken());
+  const { user, logout } = useAuth();
+  const isAuthed = Boolean(user);
 
   const setLang = (lng) => i18n.changeLanguage(lng);
 
@@ -98,8 +99,8 @@ export default function GovHeader({
               </Link>
               <button
                 className="flex items-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 px-3 py-2 rounded-xl transition-all font-semibold text-sm border border-transparent hover:border-rose-200 dark:hover:border-rose-800"
-                onClick={() => {
-                  clearSession();
+                onClick={async () => {
+                  await logout();
                   nav("/welcome");
                 }}
               >

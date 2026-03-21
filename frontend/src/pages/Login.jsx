@@ -2,13 +2,14 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
-import { API_BASE } from "../api";
+import { useAuth } from "../contexts/AuthContext";
 import useTheme from "../hooks/useTheme";
 
 export default function Login() {
   const nav = useNavigate();
   const loc = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,17 +33,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || `Login failed: ${res.status}`);
-
-      localStorage.setItem("smartbus_token", data.token);
-      localStorage.setItem("smartbus_user", JSON.stringify(data.user));
+      await login(email.trim(), password);
       nav("/app");
     } catch (e) {
       setError(String(e?.message || e));

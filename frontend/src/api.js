@@ -1,25 +1,36 @@
 export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
 
 export function getAuthToken() {
-  try {
-    return localStorage.getItem("smartbus_token") || "";
-  } catch {
-    return "";
-  }
+  // Deprecated: React no longer parses the token, it lives in a native httpOnly Cookie.
+  // We return a dummy standard if strictly needed for layout comparisons.
+  return "cookie-managed";
 }
 
-export function clearSession() {
+export async function clearSession() {
   try {
-    localStorage.removeItem("smartbus_token");
     localStorage.removeItem("smartbus_user");
+    await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", credentials: "include" });
   } catch {
     // ignore
   }
 }
 
 export function authHeaders(extra = {}) {
-  const token = getAuthToken();
-  return token ? { ...extra, Authorization: `Bearer ${token}` } : { ...extra };
+  return { ...extra };
+}
+
+// Helper wrapper to enforce native Cookie exchanges over the network
+async function apiFetch(endpoint, options = {}) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers: { ...options.headers },
+    credentials: "include" // Forces the browser to send httpOnly cookies
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `${endpoint} failed: ${res.status}`);
+  }
+  return res.json();
 }
 
 async function handle(res, label) {
@@ -28,77 +39,70 @@ async function handle(res, label) {
 }
 
 export async function getBusEta(busId) {
-  const res = await fetch(`${API_BASE}/api/bus/${encodeURIComponent(busId)}/eta`, {
-    headers: authHeaders(),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || "Failed to fetch ETA");
-  }
-  return res.json();
+  return apiFetch(`/api/bus/${encodeURIComponent(busId)}/eta`, { headers: authHeaders() });
 }
 
 export function getLiveBuses() {
-  return fetch(`${API_BASE}/api/buses/live`, { headers: authHeaders() }).then((r) => handle(r, "buses/live"));
+  return apiFetch(`/api/buses/live`, { headers: authHeaders() });
 }
 
 export function getRoutes() {
-  return fetch(`${API_BASE}/api/routes`, { headers: authHeaders() }).then((r) => handle(r, "routes"));
+  return apiFetch(`/api/routes`, { headers: authHeaders() });
 }
 
 export function getStops(routeId) {
-  return fetch(`${API_BASE}/api/routes/${routeId}/stops`, { headers: authHeaders() }).then((r) => handle(r, "stops"));
+  return apiFetch(`/api/routes/${routeId}/stops`, { headers: authHeaders() });
 }
 
 export function getBusLatest(busId) {
-  return fetch(`${API_BASE}/api/bus/${busId}/latest`, { headers: authHeaders() }).then((r) => handle(r, "bus/latest"));
+  return apiFetch(`/api/bus/${busId}/latest`, { headers: authHeaders() });
 }
 
 export async function listRoutes() {
-  return fetch(`${API_BASE}/api/admin/routes`, { headers: authHeaders() }).then((r) => handle(r, "admin/routes"));
+  return apiFetch(`/api/admin/routes`, { headers: authHeaders() });
 }
 export async function createRoute(payload) {
-  return fetch(`${API_BASE}/api/admin/routes`, {
+  return apiFetch(`/api/admin/routes`, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
-  }).then((r) => handle(r, "admin/routes:create"));
+  });
 }
 export async function updateRoute(routeId, payload) {
-  return fetch(`${API_BASE}/api/admin/routes/${encodeURIComponent(routeId)}`, {
+  return apiFetch(`/api/admin/routes/${encodeURIComponent(routeId)}`, {
     method: "PUT",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
-  }).then((r) => handle(r, "admin/routes:update"));
+  });
 }
 export async function deleteRoute(routeId) {
-  return fetch(`${API_BASE}/api/admin/routes/${encodeURIComponent(routeId)}`, {
+  return apiFetch(`/api/admin/routes/${encodeURIComponent(routeId)}`, {
     method: "DELETE",
     headers: authHeaders(),
-  }).then((r) => handle(r, "admin/routes:delete"));
+  });
 }
 
 export async function listStops(routeId) {
   const q = routeId ? `?routeId=${encodeURIComponent(routeId)}` : "";
-  return fetch(`${API_BASE}/api/admin/stops${q}`, { headers: authHeaders() }).then((r) => handle(r, "admin/stops"));
+  return apiFetch(`/api/admin/stops${q}`, { headers: authHeaders() });
 }
 export async function createStop(payload) {
-  return fetch(`${API_BASE}/api/admin/stops`, {
+  return apiFetch(`/api/admin/stops`, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
-  }).then((r) => handle(r, "admin/stops:create"));
+  });
 }
 export async function updateStop(stopId, payload) {
-  return fetch(`${API_BASE}/api/admin/stops/${encodeURIComponent(stopId)}`, {
+  return apiFetch(`/api/admin/stops/${encodeURIComponent(stopId)}`, {
     method: "PUT",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
-  }).then((r) => handle(r, "admin/stops:update"));
+  });
 }
 export async function deleteStop(stopId) {
-  return fetch(`${API_BASE}/api/admin/stops/${encodeURIComponent(stopId)}`, {
+  return apiFetch(`/api/admin/stops/${encodeURIComponent(stopId)}`, {
     method: "DELETE",
     headers: authHeaders(),
-  }).then((r) => handle(r, "admin/stops:delete"));
+  });
 }

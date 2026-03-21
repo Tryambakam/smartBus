@@ -14,7 +14,6 @@ import AlertsBar from "../components/AlertsBar";
 import BusMarker from "../components/BusMarker";
 import StopMarker from "../components/StopMarker";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { ResponsiveContainer, LineChart, Line, YAxis, Tooltip, BarChart, Bar, XAxis, Cell } from "recharts";
 import useDebounce from "../hooks/useDebounce";
 import { getBusLatest, getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
 import { io as ioClient } from "socket.io-client";
@@ -49,21 +48,6 @@ export default function LiveMap() {
   // const { t } = useTranslation(); // safe even if unused
   const { theme, toggleTheme } = useTheme();
 
-  // Mock Data for Prediction Accuracy
-  const accuracyData = [
-    { time: "08:15", delay: 0 },
-    { time: "08:30", delay: 2 },
-    { time: "08:45", delay: 7 },
-    { time: "09:00", delay: 0 },
-    { time: "09:15", delay: 3 }
-  ];
-
-  const getAccuracyColor = (delay) => {
-    if (delay <= 1) return "#10b981"; // Emerald
-    if (delay <= 5) return "#f59e0b"; // Amber
-    return "#e11d48"; // Rose
-  };
-
   const [showNotice, setShowNotice] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [busFilter, setBusFilter] = useState("All");
@@ -72,7 +56,6 @@ export default function LiveMap() {
   const [hoveredStopId, setHoveredStopId] = useState(null);
   const [activeLocationTracker, setActiveLocationTracker] = useState(null);
   const [showStreetViewPanel, setShowStreetViewPanel] = useState(false);
-  const [speedHistoryMap, setSpeedHistoryMap] = useState({});
   const [selectedBusId, setSelectedBusId] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [selectedBusLoading, setSelectedBusLoading] = useState(false);
@@ -190,17 +173,6 @@ export default function LiveMap() {
       setStatus(`Live Stream: ${new Date().toLocaleTimeString()}`);
       setBusesSyncing(true);
       setTimeout(() => setBusesSyncing(false), 500);
-
-      setSpeedHistoryMap(prev => {
-        const next = { ...prev };
-        const timeLabel = new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' });
-        busesPayload.forEach(b => {
-          if (!next[b.busId]) next[b.busId] = [];
-          next[b.busId] = [...next[b.busId], { time: timeLabel, speed: b.speed }];
-          if (next[b.busId].length > 30) next[b.busId].shift(); // Keep last 30 intervals (5 min proxy)
-        });
-        return next;
-      });
     });
 
     socket.on("bus:update", (bus) => {
@@ -494,35 +466,6 @@ export default function LiveMap() {
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">Quick actions</div>
-            <div className="flex gap-2 flex-wrap">
-              <Link className="px-4 py-2 text-sm font-medium bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-600 drop-shadow-sm flex items-center gap-1 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-200" to="/operator">
-                Operator demo &rarr;
-              </Link>
-              <button
-                className="px-4 py-2 text-sm font-medium bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-lg border border-emerald-200 dark:border-emerald-800 drop-shadow-sm flex items-center gap-1.5 hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all duration-200"
-                type="button"
-                onClick={() => alert("Simulation: Sharing live GPS... View the map!")}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Start sharing location
-              </button>
-              {selectedBusId ? (
-                <button
-                  className="px-4 py-2 text-sm font-medium bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 rounded-lg transition-colors border border-rose-200 dark:border-rose-800 drop-shadow-sm"
-                  type="button"
-                  onClick={() => {
-                    setSelectedBusId(null);
-                    setSelectedBus(null);
-                  }}
-                >
-                  Clear selection
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <div>
             <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors duration-300">Select Route</div>
             {routesLoading ? (
               <div className="h-10 bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg transition-colors duration-300" />
@@ -593,11 +536,11 @@ export default function LiveMap() {
               <div className="flex flex-col gap-1.5 p-4 bg-white/70 dark:bg-slate-800/80 rounded-xl border border-blue-100 dark:border-slate-600 shadow-sm transition-colors duration-300">
                 <b className="text-[#0b4ea2] dark:text-blue-300 text-lg leading-tight transition-colors duration-300">{selectedBus.busId}</b>
                 <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Route: <span className="font-medium text-slate-800 dark:text-slate-200">{selectedBus.routeId || "—"}</span></div>
-                <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Speed: <span className="font-medium text-emerald-600 dark:text-emerald-400">{selectedBus.speed ?? 0} km/h</span></div>
                 <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">
                   Updated: {selectedBus.timestamp ? new Date(selectedBus.timestamp).toLocaleTimeString() : "—"}
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 flex gap-2">
+                  <button onClick={() => { setSelectedBusId(null); setSelectedBus(null); }} className="inline-block text-rose-600 dark:text-rose-400 font-medium text-sm transition-colors cursor-pointer border-b border-rose-100 hover:border-rose-400 pb-0.5">Deselect &times;</button>
                   <Link className="inline-block text-[#0b4ea2] dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors border-b border-transparent hover:border-blue-800 dark:hover:border-blue-300 pb-0.5" to={`/bus/${encodeURIComponent(selectedBus.busId)}`}>Open details &rarr;</Link>
                 </div>
               </div>
@@ -697,7 +640,6 @@ export default function LiveMap() {
                       <div>
                         <div className="font-bold text-[#0b4ea2] text-md">{b.busId}</div>
                         {b.routeId && <div className="text-sm text-slate-700">Route: {b.routeId}</div>}
-                        <div className="text-sm text-slate-700">Speed: <span className="text-emerald-600 font-medium">{b.speed ?? 0} km/h</span></div>
                         <div className="text-xs text-slate-500 mt-1 pt-1 border-t border-slate-100">
                           {b.timestamp ? new Date(b.timestamp).toLocaleString() : "N/A"}
                         </div>
@@ -870,9 +812,6 @@ export default function LiveMap() {
                             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                               {b.busStatus || (b.speed > 0 ? "On Route" : "Stopped")}
                             </span>
-                            <span className="text-sm text-slate-400 dark:text-slate-500 ml-1">
-                              ({b.speed ?? 0} km/h)
-                            </span>
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300 line-clamp-1">
                             Dest: Mohali ISBT (Simulated)
@@ -903,27 +842,6 @@ export default function LiveMap() {
               </>
             )}
 
-            {/* PREDICTION ACCURACY */}
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
-              <h3 className="text-sm font-bold text-[#0b4ea2] dark:text-blue-300 mb-1 uppercase tracking-wider transition-colors duration-300">Prediction Accuracy</h3>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 transition-colors duration-300">Past 5 arrivals at ISBT (Sched vs Actual delay in mins)</div>
-              
-              <div className="h-32 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={accuracyData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                    <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{ fill: 'rgba(100,116,139,0.1)' }} contentStyle={{ borderRadius: '8px', fontSize: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff', color: theme === 'dark' ? '#f8fafc' : '#0f172a' }} />
-                    <Bar dataKey="delay" radius={[4, 4, 0, 0]} maxBarSize={32}>
-                      {accuracyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getAccuracyColor(entry.delay)} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
             {/* STREET VIEW PLACEHOLDER */}
             <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
               <h3 className="text-sm font-bold text-[#0b4ea2] dark:text-blue-300 mb-3 uppercase tracking-wider transition-colors duration-300">Street View</h3>
@@ -941,106 +859,6 @@ export default function LiveMap() {
             </div>
           </div>
         </section>
-
-        {/* FLOATING TELEMETRY DASHBOARD */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-4xl px-4">
-          <AnimatePresence>
-            {selectedBus && (
-              <motion.div
-                initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-                className="bg-[#0b4ea2]/95 dark:bg-slate-900/95 backdrop-blur-xl text-white border border-blue-400/30 dark:border-slate-700 shadow-2xl rounded-2xl p-5 flex flex-col gap-4 pointer-events-auto"
-              >
-                {/* Header Container */}
-                <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white/10 p-2 rounded-xl">
-                      <MapPin size={24} className="text-emerald-400" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-blue-200 dark:text-slate-400 font-semibold uppercase tracking-wider mb-0.5">Live Telemetry &bull; Route {selectedBus.routeId}</div>
-                      <div className="text-2xl font-bold leading-none">{selectedBus.busId}</div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2 bg-black/30 px-3 py-1.5 rounded-lg border border-white/10 mb-1">
-                      <div className={`w-2.5 h-2.5 rounded-full ${selectedBus.speed > 0 ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`}></div>
-                      <span className="text-sm font-medium">{selectedBus.speed > 0 ? "En route" : "Stopped"}</span>
-                    </div>
-                    <button onClick={() => setSelectedBusId(null)} className="text-xs text-blue-200 hover:text-white transition-colors underline">Close Dashboard</button>
-                  </div>
-                </div>
-
-                {/* Grid Wrapper */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-
-                  {/* WIDGET 1: Speed Gauge */}
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col items-center justify-center relative">
-                    <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider absolute top-3 left-4">Current Speed</span>
-                    <div className="relative w-24 h-24 mt-4 flex items-center justify-center">
-                      <svg className="w-full h-full transform -rotate-90 pointer-events-none">
-                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/10" />
-                        <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="8" fill="transparent"
-                          strokeDasharray="251.2"
-                          strokeDashoffset={251.2 - ((Math.min(selectedBus.speed || 0, 80) / 80) * 251.2)}
-                          className={`transition-all duration-1000 ease-out ${selectedBus.speed < 30 ? 'text-emerald-400' : selectedBus.speed <= 60 ? 'text-amber-400' : 'text-rose-500'}`}
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl font-black shadow-black drop-shadow-md">{selectedBus.speed || 0}</span>
-                        <span className="text-[10px] text-white/70 font-medium tracking-wide">km/h</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* WIDGET 2: LineChart History */}
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col items-start justify-center col-span-1 md:col-span-2 relative h-36">
-                    <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider mb-2">Pace Analytics (5 min)</span>
-                    <div className="w-full h-full flex-1">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={speedHistoryMap[selectedBus.busId] || []}>
-                          <YAxis hide domain={[0, 80]} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }}
-                            itemStyle={{ color: '#34d399' }}
-                            labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
-                          />
-                          <Line type="monotone" dataKey="speed" stroke="#34d399" strokeWidth={3} dot={false} activeDot={{ r: 4, fill: '#fff' }} isAnimationActive={true} animationDuration={500} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-
-                  {/* WIDGET 3: Next Stops & Progress Tracker */}
-                  <div className="bg-black/20 rounded-xl p-4 border border-white/5 flex flex-col relative h-36 overflow-hidden">
-                    <div className="flex justify-between items-center mb-2 z-10 w-full">
-                      <span className="text-blue-200/80 text-xs font-semibold uppercase tracking-wider">Upcoming Stops</span>
-                      <span className="text-white/60 text-[10px] uppercase font-bold tracking-wider">ETA</span>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-1.5 z-10 w-full mb-2">
-                      {safeStops.slice(0, 3).map((st, i) => (
-                        <div key={st.stopId} className="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/5 shadow-inner">
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full bg-blue-500 text-[9px] font-bold flex items-center justify-center shrink-0">{st.sequence}</div>
-                            <span className="text-xs font-medium truncate max-w-[80px]" title={st.name_en}>{st.name_en}</span>
-                          </div>
-                          <span className="text-emerald-400 text-[11px] font-bold">+{i * 4 + 2}m</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Background Progress bar visual mock mapped off a 65% standard distance parameter */}
-                    <div className="absolute bottom-0 left-0 w-full h-1.5 bg-white/10" title="Trip Progress (Simulated)">
-                      <div className="h-full bg-emerald-500 rounded-r-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" style={{ width: '65%' }}></div>
-                    </div>
-                  </div>
-
-                </div>
-
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
 
       </motion.main>
 

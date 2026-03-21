@@ -2,12 +2,13 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
-import { API_BASE } from "../api";
+import { useAuth } from "../contexts/AuthContext";
 import useTheme from "../hooks/useTheme";
 
 export default function Register() {
   const nav = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { register } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,17 +21,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || `Register failed: ${res.status}`);
-
-      localStorage.setItem("smartbus_token", data.token);
-      localStorage.setItem("smartbus_user", JSON.stringify(data.user));
+      await register(name.trim(), email.trim(), password);
       nav("/app");
     } catch (e) {
       setError(String(e?.message || e));

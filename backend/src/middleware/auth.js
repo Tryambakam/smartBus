@@ -2,11 +2,17 @@ const jwt = require("jsonwebtoken");
 
 function requireAuth(req, res, next) {
   try {
-    const header = req.headers.authorization || "";
-    const [type, token] = header.split(" ");
+    let token = req.cookies?.token;
+    
+    // Fallback for development explicit passing, if needed
+    if (!token) {
+      const header = req.headers.authorization || "";
+      const [type, t] = header.split(" ");
+      if (type === "Bearer" && t) token = t;
+    }
 
-    if (type !== "Bearer" || !token) {
-      return res.status(401).json({ ok: false, error: "Missing Bearer token" });
+    if (!token) {
+      return res.status(401).json({ ok: false, error: "Missing authentication token" });
     }
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);

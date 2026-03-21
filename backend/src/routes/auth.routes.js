@@ -32,9 +32,15 @@ router.post("/auth/register", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     return res.status(201).json({
       ok: true,
-      token,
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (err) {
@@ -65,9 +71,15 @@ router.post("/auth/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     return res.json({
       ok: true,
-      token,
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (err) {
@@ -79,6 +91,16 @@ router.post("/auth/login", async (req, res) => {
 // GET /api/auth/me
 router.get("/auth/me", requireAuth, async (req, res) => {
   return res.json({ ok: true, user: req.user });
+});
+
+// POST /api/auth/logout
+router.post("/auth/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict"
+  });
+  return res.json({ ok: true });
 });
 
 module.exports = router;
