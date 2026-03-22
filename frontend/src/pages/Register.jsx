@@ -10,7 +10,7 @@ export default function Register() {
   const { theme, toggleTheme } = useTheme();
   const { register } = useAuth();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,8 +21,10 @@ export default function Register() {
     setLoading(true);
 
     try {
-      await register(name.trim(), email.trim(), password);
-      nav("/app");
+      const activeUser = await register(name.trim(), username.trim(), password);
+      if (activeUser?.role === "admin") nav("/admin");
+      else if (activeUser?.role === "operator") nav("/operator");
+      else nav("/");
     } catch (e) {
       setError(String(e?.message || e));
     } finally {
@@ -30,7 +32,7 @@ export default function Register() {
     }
   }
 
-  const canSubmit = name.trim() && email.trim() && password;
+  const canSubmit = name.trim() && username.trim() && password;
 
   return (
     <div className="gov-shell">
@@ -67,13 +69,13 @@ export default function Register() {
 
               <div style={{ height: 10 }} />
 
-              <div className="label">Email</div>
+              <div className="label">Username</div>
               <input
                 className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                autoComplete="email"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Unique username"
+                autoComplete="username"
               />
 
               <div style={{ height: 10 }} />

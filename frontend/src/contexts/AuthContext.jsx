@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { API_BASE } from "../api";
+import { API_BASE, apiFetch } from "../api";
 
 const AuthContext = createContext();
 
@@ -30,33 +30,29 @@ export function AuthProvider({ children }) {
     return () => { isMounted = false; };
   }, []);
 
-  const login = async (email, password) => {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+  const login = async (username, password) => {
+    const data = await apiFetch(`/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-      credentials: "include"
+      body: JSON.stringify({ username, password })
     });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) throw new Error(data?.error || "Login failed");
     setUser(data.user);
+    return data.user;
   };
 
-  const register = async (name, email, password) => {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
+  const register = async (name, username, password) => {
+    const data = await apiFetch(`/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-      credentials: "include"
+      body: JSON.stringify({ name, username, password })
     });
-    const data = await res.json().catch(() => null);
-    if (!res.ok) throw new Error(data?.error || "Register failed");
     setUser(data.user);
+    return data.user;
   };
 
   const logout = async () => {
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", credentials: "include" });
+      await apiFetch(`/api/auth/logout`, { method: "POST" });
     } finally {
       setUser(null);
     }

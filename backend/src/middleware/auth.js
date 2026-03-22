@@ -23,4 +23,16 @@ function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth };
+function requireRole(...allowedRoles) {
+  return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return res.status(403).json({ ok: false, error: "Access denied. No role assigned." });
+    }
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ ok: false, error: "Access denied. Insufficient permissions." });
+    }
+    next();
+  };
+}
+
+module.exports = { requireAuth, requireRole };

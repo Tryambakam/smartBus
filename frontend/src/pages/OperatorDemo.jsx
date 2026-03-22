@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
 import useTheme from "../hooks/useTheme";
+import { useAuth } from "../contexts/AuthContext";
 import { API_BASE, authHeaders } from "../api";
 
 export default function OperatorDemo() {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth() || {};
+  const jwtBusId = user?.busId || "";
 
-  const [busId, setBusId] = useState("BUS-101");
+  const [busId, setBusId] = useState(jwtBusId || "BUS-101");
   const [routeId, setRouteId] = useState("");
   const [speed, setSpeed] = useState(18);
   const [status, setStatus] = useState("Idle");
@@ -160,7 +163,7 @@ export default function OperatorDemo() {
                     </span>
                   )}
                 </div>
-                <input className="input" value={busId} onChange={(e) => setBusId(e.target.value)} />
+                <input className={`input ${jwtBusId ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed' : ''}`} value={busId} onChange={(e) => setBusId(e.target.value)} readOnly={!!jwtBusId} />
               </div>
               <div>
                 <div className="label">Route ID (optional)</div>

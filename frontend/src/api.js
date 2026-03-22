@@ -20,7 +20,7 @@ export function authHeaders(extra = {}) {
 }
 
 // Helper wrapper to enforce native Cookie exchanges over the network
-async function apiFetch(endpoint, options = {}) {
+export async function apiFetch(endpoint, options = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: { ...options.headers },
@@ -102,7 +102,30 @@ export async function updateStop(stopId, payload) {
 }
 export async function deleteStop(stopId) {
   return apiFetch(`/api/admin/stops/${encodeURIComponent(stopId)}`, {
-    method: "DELETE",
-    headers: authHeaders(),
+    method: "DELETE"
+  });
+}
+
+// User Admin Logic
+export async function listUsers(page = 1, limit = 10) {
+  return apiFetch(`/api/admin/users?page=${page}&limit=${limit}`);
+}
+export async function createUser(payload) {
+  return apiFetch(`/api/admin/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+export async function updateUser(id, payload) {
+  return apiFetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+export async function deleteUser(id) {
+  return apiFetch(`/api/admin/users/${encodeURIComponent(id)}`, {
+    method: "DELETE"
   });
 }

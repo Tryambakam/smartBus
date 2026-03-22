@@ -19,7 +19,15 @@ exports.updateGps = async (req, res) => {
       return res.status(400).json({ ok: false, error: "lat/lng out of range" });
     }
 
-    // Note: role-based restrictions removed. Any authenticated account can submit GPS updates.
+    // Enforce JWT Context Validation locking Operators explicitly to their assigned hardware
+    if (req.user && req.user.role === "operator") {
+      if (!req.user.busId) {
+        return res.status(403).json({ ok: false, error: "Forbidden: No Bus assigned to this operator account" });
+      }
+      if (req.user.busId !== busId) {
+        return res.status(403).json({ ok: false, error: "Forbidden: Valid JWT Bus ID mismatch" });
+      }
+    }
 
     if (speed == null) speed = 0;
     if (!isNumber(speed)) speed = 0;

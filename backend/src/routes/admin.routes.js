@@ -3,9 +3,11 @@ const router = express.Router();
 
 const RouteModel = require("../models/Route");
 const StopModel = require("../models/Stop");
-const { requireAuth } = require("../middleware/auth");
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const { requireAuth, requireRole } = require("../middleware/auth");
 
-router.use("/admin", requireAuth);
+router.use("/admin", requireAuth, requireRole("admin"));
 
 // ROUTES CRUD
 router.post("/admin/routes", async (req, res) => {
@@ -132,6 +134,74 @@ router.delete("/admin/stops/:stopId", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /admin/stops/:stopId error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// USERS CRUD
+router.get("/admin/users", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const users = await User.find().select("-passwordHash").sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+    const total = await User.countDocuments();
+    res.json({ users, total, page, pages: Math.ceil(total / limit) });
+  } catch (err) {
+    console.error("GET /admin/users error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/admin/users", async (req, res) => {
+  try {
+    const { username, role, password } = req.body;
+    if (!username || !role || !password) return res.status(400).json({ error: "username, role, and password required" });
+    
+    const existing = await User.findOne({ username: String(username).toLowerCase().trim() }).lean();
+    if (existing) return res.status(409).json({ error: "Username already exists" });
+
+    const passwordHash = await bcrypt.hash(String(password), 10);
+    const created = await User.create({
+      username: String(username).toLowerCase().trim(),
+      role,
+      passwordHash,
+      busId: req.body.busId || ""
+    });
+    
+    res.status(201).json({ _id: created._id, username: created.username, role: created.role, busId: created.busId });
+  } catch (err) {
+    console.error("POST /admin/users error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.put("/admin/users/:id", async (req, res) => {
+  try {
+    const { username, role, password } = req.body;
+    const updates = {};
+    if (username) updates.username = String(username).toLowerCase().trim();
+    if (role) updates.role = role;
+    if (password) updates.passwordHash = await bcrypt.hash(String(password), 10);
+    if (req.body.busId !== undefined) updates.busId = String(req.body.busId).trim();
+
+    const upd = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select("-passwordHash");
+    if (!upd) return res.status(404).json({ error: "Not found" });
+    res.json(upd);
+  } catch (err) {
+    console.error("PUT /admin/users/:id error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/admin/users/:id", async (req, res) => {
+  try {
+    const del = await User.findByIdAndDelete(req.params.id);
+    if (!del) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE /admin/users/:id error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
