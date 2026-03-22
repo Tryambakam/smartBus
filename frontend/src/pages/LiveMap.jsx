@@ -459,7 +459,7 @@ export default function LiveMap() {
         </AnimatePresence>
 
         {/* LEFT PANEL (CONTROLS SIDEBAR) */}
-        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-1 z-10 transition-colors duration-300">
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl border border-black-[0.02] dark:border-white/5 shadow-apple-float rounded-[32px] flex flex-col p-6 space-y-5 max-lg:order-1 z-10 transition-colors duration-500 custom-scrollbar">
           <div>
             <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Controls</h2>
             <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">Route & display</div>
@@ -558,8 +558,8 @@ export default function LiveMap() {
         </section>
 
         {/* MAIN MAP AREA */}
-        <section className="lg:col-span-6 flex flex-col h-[500px] lg:h-[calc(100vh-5.5rem)] bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl overflow-hidden relative max-lg:order-2 z-0 transition-colors duration-300">
-          <div className="p-5 bg-white/60 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center z-10 transition-colors duration-300">
+        <section className="lg:col-span-6 flex flex-col h-[500px] lg:h-[calc(100vh-5.5rem)] bg-white/70 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl border border-black-[0.02] dark:border-white/5 shadow-apple-float rounded-[32px] overflow-hidden relative max-lg:order-2 z-0 transition-colors duration-500">
+          <div className="p-5 bg-slate-50/50 dark:bg-black/20 border-b border-black/5 dark:border-white/5 flex justify-between items-center z-10 transition-colors duration-500">
             <div>
               <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300">Live Map</h2>
               <div className="text-sm text-slate-500 dark:text-slate-400 mt-1 transition-colors duration-300">{stopsLoading ? "Loading stops…" : "Interactive tracking"}</div>
@@ -701,7 +701,7 @@ export default function LiveMap() {
         </section>
 
         {/* RIGHT PANEL (LIVE BUSES) */}
-        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white dark:border-slate-700 shadow-xl rounded-2xl flex flex-col p-5 space-y-5 max-lg:order-3 z-10 transition-colors duration-300">
+        <section className="lg:col-span-3 lg:sticky lg:top-4 h-[500px] lg:h-[calc(100vh-5.5rem)] overflow-y-auto bg-white/70 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl border border-black-[0.02] dark:border-white/5 shadow-apple-float rounded-[32px] flex flex-col p-6 space-y-5 max-lg:order-3 z-10 transition-colors duration-500 custom-scrollbar">
           <div className="flex justify-between items-start gap-2">
             <div>
               <h2 className="text-xl font-bold text-[#0b4ea2] dark:text-blue-300 transition-colors duration-300 whitespace-nowrap">Live Buses</h2>
@@ -791,7 +791,7 @@ export default function LiveMap() {
                       exit={{ opacity: 0, y: 15, scale: 0.95 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
                       key={b.busId}
-                      className={`p-4 rounded-xl border transition-all cursor-pointer bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 shadow-sm hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] ${b.busId === selectedBusId ? "ring-2 ring-[#0b4ea2] dark:ring-blue-400 border-transparent dark:border-transparent" : "hover:border-[#0b4ea2]/50 dark:hover:border-blue-400/50"}`}
+                      className={`p-4 rounded-[20px] border transition-all cursor-pointer bg-white/80 dark:bg-[#1C1C1E] border-slate-200 dark:border-white/5 shadow-sm hover:-translate-y-1 hover:shadow-apple active:scale-[0.98] ${b.busId === selectedBusId ? "ring-2 ring-blue-500 dark:ring-blue-400 border-transparent dark:border-transparent" : "hover:border-blue-500/50 dark:hover:border-blue-400/50"}`}
                       onClick={() => focusBus(b)}
                     >
                       <div className="flex justify-between items-start">

@@ -139,13 +139,15 @@ export default function OperatorDemo() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
-        <section className="card" style={{ maxWidth: 760 }}>
-          <div className="card-h">
-            <div className="h">Operator Panel</div>
-            <div className="muted">Simulate a moving bus</div>
+        <section className="bg-white/70 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl rounded-[32px] shadow-apple-float border border-black-[0.02] dark:border-white/5 overflow-hidden w-full transition-colors duration-500">
+          <div className="p-6 border-b border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-black/20 flex items-center justify-between">
+            <div>
+              <div className="text-xl font-[800] text-slate-900 dark:text-white">Operator Console</div>
+              <div className="text-[13px] font-[500] text-slate-500 dark:text-slate-400 mt-0.5">Hardware Matrix Simulation</div>
+            </div>
           </div>
-          <div className="card-b">
-            <div className="muted" style={{ marginBottom: 8 }}>
+          <div className="p-6 md:p-8">
+            <div className="mb-6">
               <Link to="/app">← Back to dashboard</Link>
             </div>
 
@@ -203,24 +205,24 @@ export default function OperatorDemo() {
               </div>
             </div>
 
-            <div className="divider" />
+            <div className="h-px bg-black/5 dark:bg-white/10 my-6" />
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 20 }}>
-              <button className="btn" onClick={start}>
-                Start sharing location
+            <div className="flex gap-3 flex-wrap mt-6">
+              <button className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-3 rounded-full font-[700] text-[14px] shadow-md transition-all active:scale-95" onClick={start}>
+                Start transmitting location
               </button>
-              <button className="select" onClick={stop}>
+              <button className="bg-rose-500 hover:bg-rose-400 text-white px-6 py-3 rounded-full font-[700] text-[14px] shadow-md transition-all active:scale-95" onClick={stop}>
                 Stop
               </button>
             </div>
 
-            <div className="divider" />
+            <div className="h-px bg-black/5 dark:bg-white/10 my-6" />
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="btn" style={{ backgroundColor: "#0b4ea2" }} onClick={handleAnnounce}>
+            <div className="flex gap-3 flex-wrap">
+              <button className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-full font-[600] text-[13px] shadow-sm transition-all active:scale-95" onClick={handleAnnounce}>
                 Announce Next Stop
               </button>
-              <button className="btn" style={{ backgroundColor: "#b91c1c" }} onClick={() => setShowDelayModal(true)}>
+              <button className="bg-amber-500 hover:bg-amber-400 text-white px-5 py-2.5 rounded-full font-[600] text-[13px] shadow-sm transition-all active:scale-95" onClick={() => setShowDelayModal(true)}>
                 Report Delay...
               </button>
             </div>
