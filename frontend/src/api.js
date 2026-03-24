@@ -38,10 +38,6 @@ async function handle(res, label) {
   return res.json();
 }
 
-export async function getBusEta(busId) {
-  return apiFetch(`/api/bus/${encodeURIComponent(busId)}/eta`, { headers: authHeaders() });
-}
-
 export function getLiveBuses() {
   return apiFetch(`/api/buses/live`, { headers: authHeaders() });
 }

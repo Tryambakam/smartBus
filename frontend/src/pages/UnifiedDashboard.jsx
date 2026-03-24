@@ -1,13 +1,13 @@
 import { useAuth } from "../contexts/AuthContext";
-import LiveMap from "./LiveMap";
 import AdminDashboard from "./AdminDashboard";
 import OperatorDemo from "./OperatorDemo";
+import CommuterSearch from "./CommuterSearch";
 
 export default function UnifiedDashboard() {
   const { role, loading } = useAuth();
 
   if (loading) {
-    return <div className="p-8 text-slate-500 font-medium">Authenticating Unified Dashboard...</div>;
+    return <div className="p-8 text-slate-500 font-[500] text-center w-full flex justify-center items-center min-h-screen">Authenticating Secure Platform...</div>;
   }
 
   // Switch the primary view dynamically utilizing the securely decrypted role string
@@ -18,6 +18,7 @@ export default function UnifiedDashboard() {
       return <OperatorDemo />;
     case "commuter":
     default:
-      return <LiveMap />;
+      // Overriding standard maps for the ultra-minimal Search Architecture
+      return <CommuterSearch />;
   }
 }

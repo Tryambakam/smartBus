@@ -1,12 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LiveMap from "./pages/LiveMap";
-import BusDetails from "./pages/BusDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import RequireAuth from "./components/RequireAuth";
 import OperatorDemo from "./pages/OperatorDemo";
-import DriverDashboard from "./pages/DriverDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import UnifiedDashboard from "./pages/UnifiedDashboard";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -35,11 +32,11 @@ export default function App() {
                   {/* Generic Fallbacks */}
                   <Route path="app" element={<Navigate to="/dashboard" replace />} />
                   <Route path="map" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="routes" element={<LiveMap />} />
-                  <Route path="alerts" element={<LiveMap />} />
+                  <Route path="routes" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="alerts" element={<Navigate to="/dashboard" replace />} />
                   
                   {/* Universal Tracking */}
-                  <Route path="bus/:busId" element={<BusDetails />} />
+                  <Route path="bus/:busId" element={<Navigate to="/dashboard" replace />} />
                   
                   {/* Strict Operational Hierarchy (Operators + Admins) */}
                   <Route path="operator/*" element={
