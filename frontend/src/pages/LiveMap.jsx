@@ -15,6 +15,7 @@ import BusMarker from "../components/BusMarker";
 import StopMarker from "../components/StopMarker";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import useDebounce from "../hooks/useDebounce";
+import { useAuth } from "../contexts/AuthContext";
 import { getBusLatest, getLiveBuses, getRoutes, getStops, API_BASE } from "../api";
 import { io as ioClient } from "socket.io-client";
 
@@ -45,7 +46,7 @@ function hasLatLng(obj) {
 }
 
 export default function LiveMap() {
-  // const { t } = useTranslation(); // safe even if unused
+  const { role } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const [showNotice, setShowNotice] = useState(true);
@@ -142,6 +143,17 @@ export default function LiveMap() {
   // Header status
   const backendOk =
     !routesError && !stopsError && !busesError && !String(status).toLowerCase().includes("unreachable");
+
+  const getRouteName = (rId) => {
+    if (!rId) return "Unknown Route";
+    const r = routes.find(route => route.routeId === rId);
+    return r ? `${r.name} (${r.routeId})` : rId;
+  };
+
+  const getPublicIdentity = (bus) => {
+    if (role === "admin" || role === "operator") return bus.busId;
+    return getRouteName(bus.routeId);
+  };
 
   // ---------------------------
   // Socket.IO: connect & listen
@@ -534,8 +546,12 @@ export default function LiveMap() {
               <div className="text-rose-600 dark:text-rose-400 text-sm bg-rose-50 dark:bg-rose-900/30 p-2 rounded border border-rose-100 dark:border-rose-800 transition-colors duration-300">{selectedBusError}</div>
             ) : selectedBus ? (
               <div className="flex flex-col gap-1.5 p-4 bg-white/70 dark:bg-slate-800/80 rounded-xl border border-blue-100 dark:border-slate-600 shadow-sm transition-colors duration-300">
-                <b className="text-[#0b4ea2] dark:text-blue-300 text-lg leading-tight transition-colors duration-300">{selectedBus.busId}</b>
-                <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Route: <span className="font-medium text-slate-800 dark:text-slate-200">{selectedBus.routeId || "—"}</span></div>
+                <b className="text-[#0b4ea2] dark:text-blue-300 text-lg leading-tight transition-colors duration-300">
+                  {getPublicIdentity(selectedBus)}
+                </b>
+                {role !== "commuter" && (
+                  <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">Route: <span className="font-medium text-slate-800 dark:text-slate-200">{selectedBus.routeId || "—"}</span></div>
+                )}
                 <div className="text-sm text-slate-600 dark:text-slate-400 transition-colors duration-300">
                   Updated: {selectedBus.timestamp ? new Date(selectedBus.timestamp).toLocaleTimeString() : "—"}
                 </div>
@@ -638,8 +654,10 @@ export default function LiveMap() {
                   >
                     <Popup>
                       <div>
-                        <div className="font-bold text-[#0b4ea2] text-md">{b.busId}</div>
-                        {b.routeId && <div className="text-sm text-slate-700">Route: {b.routeId}</div>}
+                        <div className="font-bold text-[#0b4ea2] text-md leading-tight">
+                          {getPublicIdentity(b)}
+                        </div>
+                        {b.routeId && role !== "commuter" && <div className="text-sm text-slate-700 mt-1">Route: {b.routeId}</div>}
                         <div className="text-xs text-slate-500 mt-1 pt-1 border-t border-slate-100">
                           {b.timestamp ? new Date(b.timestamp).toLocaleString() : "N/A"}
                         </div>
@@ -752,8 +770,10 @@ export default function LiveMap() {
                   >
                     {filteredBuses.slice(0, 8).map(b => (
                       <div key={b.busId} className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b last:border-0 border-slate-100 dark:border-slate-700/50 flex justify-between items-center transition-colors" onClick={() => { focusBus(b); setBusQuery(""); }}>
-                        <span className="font-semibold text-slate-800 dark:text-slate-200">{b.busId}</span>
-                        <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-slate-800 dark:text-slate-200 truncate pr-2 max-w-[65%]">
+                          {getPublicIdentity(b)}
+                        </span>
+                        <div className="flex items-center gap-1.5 whitespace-nowrap">
                           <span className={`w-2.5 h-2.5 rounded-full ${b.busStatus === "Out of Service" ? "bg-slate-500" : b.busStatus === "Stopped" || b.speed === 0 ? "bg-rose-500" : "bg-emerald-500"}`}></span>
                           <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{b.busStatus || (b.speed > 0 ? "En route" : "Stopped")}</span>
                         </div>

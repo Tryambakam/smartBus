@@ -55,9 +55,53 @@ export function enableMockBackend() {
       return jsonRes({ ok: true, status: "Simulated GPS Received Locally" });
     }
 
-    // Generic defaults
-    if (url.includes('/api/buses/live')) return jsonRes([]);
-    if (url.includes('/api/routes')) return jsonRes([]);
+    // Simulation arrays for Public Dashboard Live Map overriding empty responses
+    if (url.includes('/api/buses/live')) {
+      return jsonRes([{
+        busId: "BUS-101",
+        routeId: "CHD-LDH",
+        lat: 30.7450,
+        lng: 76.7850,
+        speed: 45.5,
+        heading: 120,
+        busStatus: "On Route",
+        occupancy: "Low",
+        timestamp: new Date().toISOString()
+      }]);
+    }
+    
+    if (url.includes('/api/routes')) {
+      if (url.includes('/stops')) {
+        return jsonRes([
+          { stopId: "S-1", routeId: "R-100", name_en: "Sector 17 Plaza", lat: 30.7414, lng: 76.7820, sequence: 1 },
+          { stopId: "S-2", routeId: "R-100", name_en: "Rose Garden", lat: 30.7475, lng: 76.7865, sequence: 2 },
+          { stopId: "S-3", routeId: "R-100", name_en: "Rock Garden", lat: 30.7525, lng: 76.8080, sequence: 3 },
+          { stopId: "S-4", routeId: "R-100", name_en: "Sukhna Lake", lat: 30.7421, lng: 76.8188, sequence: 4 }
+        ]);
+      }
+      return jsonRes([{ routeId: "CHD-LDH", name: "Chandigarh to Ludhiana (CHD-LDH)", agency: "Demo Transit", isActive: true }]);
+    }
+
+    // Isolate component telemetry preventing 401 Auth Falls
+    if (url.includes('/latest')) {
+      return jsonRes({
+        ok: true, data: {
+          busId: "BUS-101", routeId: "CHD-LDH", lat: 30.7142, lng: 76.7370,
+          speed: 65.5, heading: 270, busStatus: "On Route", timestamp: new Date().toISOString()
+        }
+      });
+    }
+
+    if (url.includes('/eta')) {
+      return jsonRes({
+        ok: true, busId: "BUS-101", routeId: "CHD-LDH", speedKmh: 65.5,
+        calculatedAt: new Date().toISOString(),
+        nextStops: [
+          { stopId: "S-101", routeId: "CHD-LDH", name_en: "Mohali Bypass", sequence: 2, distanceKm: 2.1, etaMinutes: 2.5 },
+          { stopId: "S-102", routeId: "CHD-LDH", name_en: "Kharar Highway", sequence: 3, distanceKm: 12.3, etaMinutes: 11.2 }
+        ]
+      });
+    }
 
     return originalFetch(...args);
   };

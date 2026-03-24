@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
-import { getBusEta } from "../api";
+import { getBusEta, getRoutes } from "../api";
+import { useAuth } from "../contexts/AuthContext";
 
 function fmtMins(x) {
   if (x == null || Number.isNaN(Number(x))) return "—";
@@ -12,10 +13,23 @@ function fmtMins(x) {
 
 export default function BusDetails() {
   const { busId } = useParams();
+  const { role } = useAuth();
 
   const [eta, setEta] = useState(null);
+  const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await getRoutes();
+        if (Array.isArray(r)) setRoutes(r);
+      } catch (e) {
+        // quiet fail
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,12 +81,18 @@ export default function BusDetails() {
               <Link to="/app" className="hover:text-blue-600 transition-colors">← Back to Live Map</Link>
             </div>
             <div className="text-2xl font-[900] tracking-tight text-slate-900 dark:text-white flex items-center justify-between">
-              {busId}
+              {role === "commuter" ? (
+                <span className="truncate pr-4">{eta && eta.routeId ? (routes.find(r => r.routeId === eta.routeId)?.name || eta.routeId) : "Active Commuter Route"}</span>
+              ) : (
+                busId
+              )}
               <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded-full font-[700] text-[12px] shadow-sm transition-all active:scale-95" onClick={() => window.location.reload()}>
                 Refresh
               </button>
             </div>
-            <div className="text-[13px] font-[500] text-slate-500 dark:text-slate-400">Tracking & ETA Overview</div>
+            <div className="text-[13px] font-[500] text-slate-500 dark:text-slate-400">
+              {role === "commuter" ? `Bus Operator ID Masked` : `Tracking & ETA Overview`}
+            </div>
           </div>
 
           <div className="p-6 flex flex-col gap-4">

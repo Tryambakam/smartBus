@@ -16,7 +16,7 @@ async function initMockData() {
           occupancy: occs[Math.floor(Math.random() * occs.length)]
         };
       });
-      console.log(`[Socket Mock] Initialized ${activeBuses.length} buses for simulation.`);
+      console.log(`[Socket Mock] Initialized ${activeBuses.length} buses for simulation. Telemetry active.`);
     }
   } catch (err) {
     console.error("[Socket Mock] Init error:", err);

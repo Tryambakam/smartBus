@@ -14,3 +14,9 @@
 body{
   margin: 0;
 }
+
+/* Custom Cursor Overrides */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
