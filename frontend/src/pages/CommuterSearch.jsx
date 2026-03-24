@@ -3,7 +3,19 @@ import { Search, Clock, MapPin, ChevronRight, ArrowLeft } from "lucide-react";
 import GovHeader from "../components/GovHeader";
 import useTheme from "../hooks/useTheme";
 import { getRoutes, getLiveBuses, getStops } from "../api";
-import RouteTimeline from "./RouteTimeline";
+import LocationTable from "./LocationTable";
+
+// Strict Subsequence string-distance matcher matching user intent despite misspellings/spaces
+const fuzzyMatch = (str, pattern) => {
+  if (!pattern || !str) return false;
+  const s = String(str).toLowerCase().replace(/\s+/g, "");
+  const p = String(pattern).toLowerCase().replace(/\s+/g, "");
+  let pIdx = 0;
+  for (let i = 0; i < s.length && pIdx < p.length; i++) {
+    if (s[i] === p[pIdx]) pIdx++;
+  }
+  return pIdx === p.length;
+};
 
 export default function CommuterSearch() {
   const { theme, toggleTheme } = useTheme();
@@ -63,9 +75,9 @@ export default function CommuterSearch() {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
 
-    // Filter routes
+    // Filter routes using subsequence fuzzy match
     const matchedRoutes = routes
-      .filter(r => r.name.toLowerCase().includes(q) || r.routeId?.toLowerCase().includes(q))
+      .filter(r => fuzzyMatch(r.name, query) || fuzzyMatch(r.routeId, query))
       .map(r => ({ type: "route", title: r.name, subtitle: `Route ID: ${r.routeId || r._id}`, data: r, id: r._id }));
 
     // Filter buses (masking raw ID with Route name for commuters)
@@ -73,8 +85,7 @@ export default function CommuterSearch() {
       // Find matching route name
       const route = routes.find(r => r._id === b.routeId || r.routeId === b.routeId);
       const routeName = route ? route.name : "Unknown Route";
-      const searchString = `${b.busId} ${routeName}`.toLowerCase();
-      return searchString.includes(q);
+      return fuzzyMatch(`${b.busId} ${routeName}`, query);
     }).map(b => {
       const route = routes.find(r => r._id === b.routeId || r.routeId === b.routeId);
       return { 
@@ -86,9 +97,9 @@ export default function CommuterSearch() {
       };
     });
 
-    // Filter stops
+    // Filter stops using subsequence fuzzy match
     const matchedStops = stops
-      .filter(s => s.name.toLowerCase().includes(q))
+      .filter(s => fuzzyMatch(s.name, query))
       .map(s => ({ type: "stop", title: s.name, subtitle: "Bus Stop", data: s, id: s._id }));
 
     return [...matchedRoutes, ...matchedBuses, ...matchedStops].slice(0, 8); // top 8 results
@@ -111,7 +122,7 @@ export default function CommuterSearch() {
             <ArrowLeft size={20} /> Back to Search
           </button>
           
-          <RouteTimeline trackingData={activeTracking} allRoutes={routes} allStops={stops} />
+          <LocationTable trackingData={activeTracking} allRoutes={routes} allStops={stops} />
         </main>
       </div>
     );
