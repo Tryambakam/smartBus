@@ -15,7 +15,7 @@ const busRoutes = require("./routes/bus.routes");
 const gpsRoutes = require("./routes/gps.routes");
 const routesRoutes = require("./routes/routes.routes");
 const adminRoutes = require("./routes/admin.routes");
-const etaRoutes = require("./routes/eta.routes");
+// const etaRoutes = require("./routes/eta.routes");
 const authRoutes = require("./routes/auth.routes");
 
 const app = express();
@@ -44,7 +44,7 @@ app.use("/api", gpsRoutes);     // POST /api/gps/update
 app.use("/api", busRoutes);     // GET /api/buses/live, etc
 app.use("/api", routesRoutes);  // GET /api/routes, GET /api/routes/:routeId/stops
 app.use("/api", adminRoutes);   // POST /api/admin/routes, POST /api/admin/stops
-app.use("/api", etaRoutes);     // GET /api/bus/:busId/eta
+// app.use("/api", etaRoutes);     // GET /api/bus/:busId/eta
 app.use("/api", authRoutes);    // POST /api/auth/login, GET /api/auth/me
 
 /* =======================
