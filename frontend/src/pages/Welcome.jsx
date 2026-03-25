@@ -27,16 +27,16 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-[#FBFBFD] dark:bg-[#000000] relative flex flex-col font-sans transition-colors duration-700 select-none custom-cursor-active overflow-hidden">
-      
+
       <GovHeader
-        lastSyncText="SmartBus"
+        lastSyncText="smartBus"
         backendOk={true}
         onToggleTheme={toggleTheme}
         themeLabel={theme === "dark" ? "night" : "day"}
       />
 
       <main className="flex-1 flex flex-col items-center justify-center p-6 w-full max-w-4xl mx-auto text-center z-10">
-        
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -44,9 +44,9 @@ export default function Welcome() {
           className="flex flex-col items-center"
         >
           <SmartBusLogo className="w-20 h-20 sm:w-24 sm:h-24 text-[#003366] dark:text-white mb-6" />
-          
+
           <div className="uppercase tracking-[0.2em] text-[#003366] dark:text-[#4CA6FF] font-[600] text-sm sm:text-base mb-4">
-             Department of Transportation
+            Department of Transportation
           </div>
 
           <h1 className="text-4xl sm:text-6xl lg:text-[72px] font-[800] tracking-tight text-[#111827] dark:text-white leading-[1.05] mb-6">
@@ -65,7 +65,7 @@ export default function Welcome() {
           className="flex flex-col sm:flex-row items-center gap-6 w-full justify-center max-w-md"
         >
           {user ? (
-            <button 
+            <button
               className="group relative w-full sm:w-auto px-8 py-3.5 bg-[#003366] dark:bg-white text-white dark:text-[#003366] font-[600] text-[17px] rounded-full transition-transform hover:scale-[1.02] flex justify-center items-center gap-1.5 shadow-md"
               onClick={() => nav("/dashboard")}
             >
@@ -74,15 +74,15 @@ export default function Welcome() {
             </button>
           ) : (
             <>
-              <Link 
+              <Link
                 to="/login"
                 className="group relative w-full sm:w-auto px-10 py-3.5 bg-[#003366] dark:bg-white text-white dark:text-[#003366] font-[600] text-[17px] rounded-full transition-transform hover:scale-[1.02] flex justify-center items-center gap-1.5 shadow-md"
               >
                 Official Login
                 <ChevronRight size={18} className="text-white/70 dark:text-[#003366]/70 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-              
-              <Link 
+
+              <Link
                 to="/register"
                 className="w-full sm:w-auto px-8 py-3.5 bg-transparent text-[#003366] dark:text-[#2997FF] hover:text-[#002244] dark:hover:text-[#41A1FF] font-[500] text-[17px] rounded-full transition-colors flex justify-center items-center group"
               >
@@ -94,7 +94,7 @@ export default function Welcome() {
         </motion.div>
 
       </main>
-      
+
       <CustomCursor isHovering={isHovering} />
     </div>
   );
