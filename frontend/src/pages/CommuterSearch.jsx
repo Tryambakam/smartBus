@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, Clock, MapPin, ChevronRight, ArrowLeft } from "lucide-react";
+import { Search, Clock, MapPin, ChevronRight, ArrowLeft, WifiOff, Map as MapIcon } from "lucide-react";
 import GovHeader from "../components/GovHeader";
 import useTheme from "../hooks/useTheme";
-import { getRoutes, getLiveBuses, getStops } from "../api";
+import { getRoutes, getLiveBuses } from "../api";
 import LocationTable from "./LocationTable";
 
 // Strict Subsequence string-distance matcher matching user intent despite misspellings/spaces
@@ -17,6 +17,18 @@ const fuzzyMatch = (str, pattern) => {
   return pIdx === p.length;
 };
 
+// Haversine distance calculator for "Nearby" logic (km)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+  const R = 6371; 
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+};
+
 export default function CommuterSearch() {
   const { theme, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
@@ -24,31 +36,77 @@ export default function CommuterSearch() {
   const [stops, setStops] = useState([]);
   const [buses, setBuses] = useState([]);
   const [recentSearches, setRecentSearches] = useState([]);
-  const [activeTracking, setActiveTracking] = useState(null); // { type: 'route' | 'bus', data: ... }
+  const [activeTracking, setActiveTracking] = useState(null); 
+  
+  // Offline Capability States
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [lastSyncTime, setLastSyncTime] = useState(null);
+  
+  // Geolocation States
+  const [isSearchingNearby, setIsSearchingNearby] = useState(false);
+
+  const hydrateFromCache = () => {
+     try {
+       const cache = JSON.parse(localStorage.getItem("smartbus_offline_tracker_cache"));
+       if (cache) {
+         setRoutes(cache.routes || []);
+         setStops(cache.stops || []);
+         setBuses(cache.buses || []);
+         setLastSyncTime(cache.timestamp);
+         setIsOffline(true);
+       }
+     } catch (e) {
+       console.error("Cache Hydration Failed", e);
+     }
+  };
 
   useEffect(() => {
-    // Load initial data for search context
-    Promise.all([getRoutes(), getLiveBuses()])
-      .then(([rRes, bRes]) => {
-        const routesData = rRes.data || rRes || [];
-        setRoutes(routesData);
-        setBuses(bRes.data || bRes || []);
-        
-        // Extract and flatten Populated Stops natively from Route Payload
-        const allStopsMap = new Map();
-        routesData.forEach(r => {
-           if (Array.isArray(r.stops)) {
-              r.stops.forEach(sRef => {
-                 const stopObj = sRef.stopId || sRef;
-                 if (stopObj && stopObj._id && stopObj.name) {
-                    allStopsMap.set(stopObj._id, stopObj);
-                 }
-              });
-           }
-        });
-        setStops(Array.from(allStopsMap.values()));
-      })
-      .catch((err) => console.error("Failed // load search context", err));
+    // Network Event Listeners
+    window.addEventListener("offline", () => setIsOffline(true));
+    window.addEventListener("online", () => setIsOffline(false));
+
+    if (!navigator.onLine) {
+       hydrateFromCache();
+    } else {
+       // Attempt network fetch
+       Promise.all([getRoutes(), getLiveBuses()])
+         .then(([rRes, bRes]) => {
+           const routesData = rRes.data || rRes || [];
+           const busesData = bRes.data || bRes || [];
+           
+           // Extract and flatten Populated Stops natively from Route Payload
+           const allStopsMap = new Map();
+           routesData.forEach(r => {
+              if (Array.isArray(r.stops)) {
+                 r.stops.forEach(sRef => {
+                    const stopObj = sRef.stopId || sRef;
+                    if (stopObj && stopObj._id && stopObj.name) {
+                       allStopsMap.set(stopObj._id, stopObj);
+                    }
+                 });
+              }
+           });
+           const flatStops = Array.from(allStopsMap.values());
+           
+           setRoutes(routesData);
+           setStops(flatStops);
+           setBuses(busesData);
+           setIsOffline(false);
+           setLastSyncTime(Date.now());
+           
+           // Cache to LocalStorage mimicking IndexedDB persistence
+           localStorage.setItem("smartbus_offline_tracker_cache", JSON.stringify({
+              routes: routesData,
+              stops: flatStops,
+              buses: busesData,
+              timestamp: Date.now()
+           }));
+         })
+         .catch((err) => {
+           console.error("Network Fetch Failed, falling back to cache", err);
+           hydrateFromCache();
+         });
+    }
 
     // Load recent searches
     try {
@@ -63,6 +121,52 @@ export default function CommuterSearch() {
     const newRecent = [item, ...recentSearches.filter(i => i.id !== item.id)].slice(0, 5);
     setRecentSearches(newRecent);
     localStorage.setItem("smartbus_recent_searches", JSON.stringify(newRecent));
+  };
+
+  const handleNearbySearch = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsSearchingNearby(true);
+    navigator.geolocation.getCurrentPosition((pos) => {
+       setIsSearchingNearby(false);
+       const { latitude, longitude } = pos.coords;
+       // Find the closest stop mathematically from cached arrays
+       let closestStop = null;
+       let minDistance = Infinity;
+       
+       stops.forEach(s => {
+          if (s.lat !== undefined && s.lng !== undefined) {
+             const lat = s.lat;
+             const lon = s.lng;
+             const dist = calculateDistance(latitude, longitude, lat, lon);
+             if (dist < minDistance) {
+               minDistance = dist;
+               closestStop = s;
+             }
+          }
+       });
+
+       if (closestStop) {
+          // Find routes that encompass this closest stop
+          const nearbyRoute = routes.find(r => r.stops.some(st => {
+             const refId = st.stopId?._id || st.stopId || st._id;
+             return refId === closestStop._id;
+          }));
+          
+          if (nearbyRoute) {
+             handleSelect({ type: "route", title: `Nearby: ${nearbyRoute.name}`, subtitle: `Located via ${closestStop.name} (${minDistance.toFixed(1)}km)`, data: nearbyRoute, id: nearbyRoute._id });
+          } else {
+             alert(`Found closest stop (${closestStop.name}) but no active tracking matrix.`);
+          }
+       } else {
+         alert("No stops structurally initialized with coordinates in the system.");
+       }
+    }, (err) => {
+       setIsSearchingNearby(false);
+       alert("Failed to access hardware location core. Check permissions.");
+    });
   };
 
   const handleSelect = (item) => {
@@ -137,7 +241,20 @@ export default function CommuterSearch() {
         themeLabel={theme === "dark" ? "night" : "day"}
       />
 
-      <main className="flex-1 w-full max-w-2xl mx-auto flex flex-col items-center justify-start p-6 pt-12 sm:pt-24 z-10">
+      <main className="flex-1 w-full max-w-2xl mx-auto flex flex-col items-center justify-start p-6 pt-8 sm:pt-16 z-10">
+        
+        {/* Offline Cache Banner */}
+        {isOffline && lastSyncTime && (
+          <div className="w-full flex items-center gap-3 p-4 mb-6 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 shadow-sm animate-pulse-slow">
+            <WifiOff size={20} className="text-rose-500 shrink-0" />
+            <div className="text-sm">
+              <span className="font-[600] text-black dark:text-white">Offline Mode Enabled.</span>{' '}
+              Schedules loaded securely from localized cache. <br/>
+              <span className="text-xs text-slate-500 opacity-80 pt-1 block">Last Synced: {new Date(lastSyncTime).toLocaleString()}</span>
+            </div>
+          </div>
+        )}
+
         <h1 className="text-4xl sm:text-5xl font-[700] tracking-tight mb-8 w-full text-left">
           Where is my bus?
         </h1>
@@ -186,12 +303,23 @@ export default function CommuterSearch() {
           </div>
         ) : (
           <div className="w-full flex flex-col gap-2">
-             {recentSearches.length > 0 && (
-               <>
-                 <h2 className="text-sm font-[600] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 px-2 flex items-center gap-2">
-                   <Clock size={16} /> Recent tracking
-                 </h2>
-                 {recentSearches.map((item, idx) => (
+             <div className="w-full flex items-center justify-between mb-2 px-2">
+               <h2 className="text-sm font-[600] text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                 <Clock size={16} /> Recent tracking
+               </h2>
+               
+               <button 
+                 onClick={handleNearbySearch}
+                 disabled={isSearchingNearby}
+                 className="flex items-center gap-1.5 text-sm font-[600] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors bg-blue-50/50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full"
+               >
+                 <MapIcon size={14} className={isSearchingNearby ? "animate-pulse" : ""} />
+                 {isSearchingNearby ? "Scanning..." : "Find Nearby Bus"}
+               </button>
+             </div>
+             
+             {recentSearches.length > 0 ? (
+                 recentSearches.map((item, idx) => (
                   <button
                     key={`recent-${idx}`}
                     onClick={() => handleSelect(item)}
@@ -203,8 +331,11 @@ export default function CommuterSearch() {
                     </div>
                     <ChevronRight className="text-slate-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                   </button>
-                 ))}
-               </>
+                 ))
+             ) : (
+                <div className="text-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-slate-500 text-sm border border-slate-100 dark:border-slate-800 border-dashed">
+                  No recent searches. Try searching for a route above or use the radar to scan nearby services.
+                </div>
              )}
           </div>
         )}
