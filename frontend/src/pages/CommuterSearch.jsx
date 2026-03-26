@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, Clock, MapPin, ChevronRight, ArrowLeft, WifiOff, Map as MapIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
 import useTheme from "../hooks/useTheme";
 import { getRoutes, getLiveBuses } from "../api";
@@ -29,8 +30,9 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
 };
 
-export default function CommuterSearch() {
+export default function CommuterSearch({ user, role }) {
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [routes, setRoutes] = useState([]);
   const [stops, setStops] = useState([]);
@@ -42,8 +44,26 @@ export default function CommuterSearch() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [lastSyncTime, setLastSyncTime] = useState(null);
   
-  // Geolocation States
+  // Geolocation & Role States
   const [isSearchingNearby, setIsSearchingNearby] = useState(false);
+  const [locationSharing, setLocationSharing] = useState(false);
+
+  // Operator Hardware Targeting
+  useEffect(() => {
+    if (role === "operator" && buses.length > 0 && routes.length > 0 && !activeTracking) {
+      const assignedBus = buses.find(b => b.operatorId?._id === user?._id || b.operatorId === user?._id);
+      if (assignedBus) {
+         const assignedRoute = routes.find(r => r._id === assignedBus.routeId?._id || r._id === assignedBus.routeId);
+         setActiveTracking({ 
+            type: "bus", 
+            title: `Bus ${assignedBus.busId}`, 
+            subtitle: assignedRoute?.name || "Assigned Route", 
+            data: assignedBus, 
+            id: assignedBus._id 
+         });
+      }
+    }
+  }, [role, user, buses, routes, activeTracking]);
 
   const hydrateFromCache = () => {
      try {
@@ -221,11 +241,30 @@ export default function CommuterSearch() {
         <main className="flex-1 w-full max-w-2xl mx-auto flex flex-col items-stretch p-4">
           <button 
             onClick={() => setActiveTracking(null)}
-            className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors self-start font-[500]"
+            className={`flex items-center gap-2 px-4 py-3 mb-4 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors self-start font-[500] ${role === 'operator' ? 'hidden' : ''}`}
           >
             <ArrowLeft size={20} /> Back to Search
           </button>
           
+          {/* Operator Specific Action Node */}
+          {role === "operator" && (
+            <div className="w-full bg-slate-50 dark:bg-[#2C2C2E] border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-8 flex justify-between items-center shadow-sm fade-in-up">
+               <div>
+                  <p className="text-xs font-[600] text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1 mt-0">Authorized Broadcasting</p>
+                  <h4 className="text-md sm:text-lg font-[800] text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${locationSharing ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                    Location Signal: {locationSharing ? 'ON' : 'OFF'}
+                  </h4>
+               </div>
+               <button 
+                  onClick={() => setLocationSharing(!locationSharing)}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-[#1C1C1E] ${locationSharing ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+               >
+                  <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${locationSharing ? 'translate-x-7' : 'translate-x-1'} shadow-sm`} />
+               </button>
+            </div>
+          )}
+
           <LocationTable trackingData={activeTracking} allRoutes={routes} allStops={stops} />
         </main>
       </div>
@@ -255,9 +294,19 @@ export default function CommuterSearch() {
           </div>
         )}
 
-        <h1 className="text-4xl sm:text-5xl font-[700] tracking-tight mb-8 w-full text-left">
-          Where is my bus?
-        </h1>
+        <div className="w-full flex justify-between items-center mb-8">
+          <h1 className="text-4xl sm:text-5xl font-[700] tracking-tight text-left">
+            Where is my bus?
+          </h1>
+          {role === "admin" && (
+             <button 
+               onClick={() => navigate("/admin/dashboard")} 
+               className="px-4 py-2 bg-[#003366] text-white text-xs font-[700] uppercase tracking-wider rounded-md hover:bg-blue-800 transition-colors shadow-sm hidden sm:block shrink-0"
+             >
+               Admin Panel &rarr;
+             </button>
+          )}
+        </div>
 
         <div className="relative w-full mb-10">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
