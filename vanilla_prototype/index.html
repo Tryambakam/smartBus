@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Where is my Bus? | SmartBus Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Strict Government Minimalist Theme */
+    :root {
+      --gov-blue: #1E3A8A;
+      --gov-dark: #1F2937;
+      --gov-white: #FFFFFF;
+      --gov-bg: #F9FAFB;
+      --gov-green: #10B981;
+      --gov-amber: #F59E0B;
+      --gov-red: #EF4444;
+      --border: #E5E7EB;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--gov-white); color: var(--gov-dark); display: flex; flex-direction: column; min-height: 100vh; overscroll-behavior-y: none; }
+    
+    /* Header */
+    header { background: var(--gov-white); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
+    .header-logo { width: 32px; height: 32px; background: var(--gov-blue); color: var(--gov-white); border-radius: 8px; display: flex; justify-content: center; align-items: center; margin-right: 12px; font-size: 16px; }
+    .header-titles { display: flex; flex-direction: column; }
+    .header-dept { font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-brand { font-size: 15px; font-weight: 700; color: var(--gov-dark); }
+    
+    /* Main Layout */
+    main { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; }
+    h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; color: var(--gov-dark); }
+    
+    /* Search Bar */
+    .search-container { position: relative; margin-bottom: 32px; width: 100%; }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9CA3AF; }
+    .search-input { width: 100%; padding: 18px 20px 18px 48px; font-size: 18px; border: 1px solid transparent; background: #F3F4F6; border-radius: 16px; outline: none; transition: 0.2s; color: var(--gov-dark); }
+    .search-input:focus { border-color: var(--gov-blue); box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1); background: var(--gov-white); }
+    .search-input::placeholder { color: #9CA3AF; }
+
+    /* Results */
+    .section-title { font-size: 12px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; margin-left: 8px; }
+    .list-container { display: flex; flex-direction: column; gap: 8px; }
+    .card { background: var(--gov-white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: background 0.2s; }
+    .card:hover { background: var(--gov-bg); }
+    .card-icon { width: 44px; height: 44px; background: rgba(30, 58, 138, 0.05); color: var(--gov-blue); border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0; }
+    .card-info { flex: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .card-subtitle { font-size: 13px; color: #6B7280; font-weight: 500; }
+    .card-arrow { color: #9CA3AF; }
+
+    /* Tracking View */
+    #tracking-view { display: none; width: 100%; animation: fadeIn 0.3s ease; }
+    .back-btn { background: none; border: none; font-size: 14px; font-weight: 600; color: #6B7280; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 24px; }
+    .back-btn:hover { color: var(--gov-dark); }
+    
+    .hero-card { background: var(--gov-white); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .hero-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .hero-labels { display: flex; flex-direction: column; gap: 6px; }
+    .hero-badge { display: inline-flex; align-items: center; padding: 4px 8px; background: var(--gov-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .hero-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #6B7280; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.green { background: var(--gov-green); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    .status-dot.amber { background: var(--gov-amber); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+    .hero-title { font-size: 24px; font-weight: 800; margin-top: 8px; }
+    .hero-share { width: 40px; height: 40px; border-radius: 50%; border: none; background: #F3F4F6; color: var(--gov-blue); display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; transition: 0.2s; }
+    .hero-share:hover { background: rgba(30, 58, 138, 0.1); }
+    
+    .eta-box { text-align: center; padding: 24px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .eta-label { font-size: 12px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .eta-stop { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .eta-time { font-size: 18px; font-weight: 700; color: var(--gov-blue); display: flex; justify-content: center; align-items: baseline; gap: 4px; }
+    .eta-time span { font-size: 56px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+    
+    .progress-container { width: 100%; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; margin-bottom: 8px; }
+    .progress-bar-bg { width: 100%; height: 12px; background: #F3F4F6; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid var(--border); }
+    .progress-bar-fill { height: 100%; background: var(--gov-blue); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+
+    /* Timeline Table */
+    .timeline-card { background: var(--gov-white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 16px; font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); background: #F9FAFB; }
+    td { padding: 16px; font-size: 14px; font-weight: 500; border-bottom: 1px solid #F3F4F6; }
+    .row-past { opacity: 0.5; background: #F9FAFB; }
+    .row-current { background: rgba(30, 58, 138, 0.05); }
+    .row-current td:first-child { border-left: 4px solid var(--gov-blue); padding-left: 12px; }
+    .alarm-btn { background: none; border: none; color: #9CA3AF; cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s; }
+    .alarm-btn:hover { color: var(--gov-blue); background: rgba(30, 58, 138, 0.1); }
+    .alarm-btn.active { color: var(--gov-amber); }
+
+    /* Footer */
+    footer { text-align: center; padding: 24px 16px; font-size: 11px; font-weight: 600; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; border-top: 1px solid var(--border); margin-top: auto; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-logo">
+      <i class="fa-solid fa-shield-halved"></i>
+    </div>
+    <div class="header-titles">
+      <span class="header-dept">Department of Transportation</span>
+      <span class="header-brand">smartBus Tracker</span>
+    </div>
+  </header>
+
+  <main>
+    <div id="search-view">
+      <h1>Where is my bus?</h1>
+      <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="bus-search" class="search-input" placeholder="Search by bus number, route name, or stop..." autocomplete="off">
+      </div>
+      
+      <div class="section-title" id="results-title">Recent Tracking</div>
+      <div class="list-container" id="results-list">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <div id="tracking-view">
+      <button class="back-btn" onclick="showSearch()"><i class="fa-solid fa-arrow-left"></i> Back to Search</button>
+      
+      <div class="hero-card">
+        <div class="hero-header">
+          <div class="hero-labels">
+            <div class="hero-badge" id="tv-badge">Bus R-101</div>
+            <div class="hero-status"><div class="status-dot green" id="tv-dot"></div><span id="tv-status">On time</span></div>
+            <div class="hero-title" id="tv-title">Route Name</div>
+          </div>
+          <button class="hero-share" onclick="shareLocation()"><i class="fa-regular fa-share-from-square"></i></button>
+        </div>
+        
+        <div class="eta-box">
+          <div class="eta-label">Next Stop</div>
+          <div class="eta-stop" id="tv-stop">Terminal</div>
+          <div class="eta-time" id="tv-eta-container">Arriving in <span id="tv-eta">--</span> min</div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-labels"><span>Origin</span><span style="display:flex;align-items:center;gap:4px;"><i class="fa-solid fa-location-arrow"></i><span id="tv-speed">42 km/h</span></span><span>Terminal</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="tv-progress"></div></div>
+        </div>
+      </div>
+
+      <div class="timeline-card">
+        <div class="table-container">
+          <table id="timeline-table">
+            <thead>
+              <tr>
+                <th>Stop Location</th>
+                <th>Scheduled</th>
+                <th>Estimated</th>
+                <th style="text-align:center;"><i class="fa-regular fa-bell"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Live tracking accuracy may vary based on network. For informational purposes only.
+  </footer>
+
+  <script>
+    // Offline Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('SW Registered!', reg);
+        }).catch(err => console.log('SW Registration Failed', err));
+      });
+    }
+
+    // Mock Data Matrix
+    const mockRoutes = [
+      { id: '1', name: 'Chandigarh to Ludhiana', busId: 'PB-01-1001', stops: ['Sector 43 ISBT', 'Kharar', 'Morinda', 'Samrala', 'Ludhiana ISBT'] },
+      { id: '2', name: 'Delhi to Patiala', busId: 'DL-11-2041', stops: ['Kashmere Gate ISBT', 'Karnal', 'Ambala', 'Rajpura', 'Patiala Bus Stand'] },
+      { id: '3', name: 'Amritsar to Jalandhar', busId: 'PB-02-5432', stops: ['Amritsar ISBT', 'Beas', 'Kartarpur', 'Jalandhar City'] },
+      { id: '4', name: 'Shimla to Chandigarh', busId: 'HP-63-9999', stops: ['Shimla ISBT', 'Solan', 'Dharampur', 'Parwanoo', 'Sector 43 ISBT'] },
+      { id: '5', name: 'Mohali City Loop', busId: 'PB-65-0001', stops: ['Phase 8', 'Phase 6', 'Phase 3B2', 'Sector 70', 'Phase 8'] }
+    ];
+
+    let currentSimulationInterval = null;
+    let activeRouteParams = null;
+    let globalStopIndex = 0;
+
+    // DOM Elements
+    const searchView = document.getElementById('search-view');
+    const trackingView = document.getElementById('tracking-view');
+    const searchInput = document.getElementById('bus-search');
+    const resultsList = document.getElementById('results-list');
+    const resultsTitle = document.getElementById('results-title');
+    
+    // Fuzzy sub-sequence matching
+    function fuzzyMatch(str, pattern) {
+      if(!pattern) return true;
+      const s = String(str).toLowerCase().replace(/\s+/g, "");
+      const p = String(pattern).toLowerCase().replace(/\s+/g, "");
+      let pIdx = 0;
+      for (let i = 0; i < s.length && pIdx < p.length; i++) {
+        if (s[i] === p[pIdx]) pIdx++;
+      }
+      return pIdx === p.length;
+    }
+
+    // Render Lists
+    function renderList(query) {
+      resultsList.innerHTML = '';
+      let matches = [];
+      if(!query) {
+        resultsTitle.innerText = "Recent Tracking";
+        matches = mockRoutes.slice(0,3);
+      } else {
+        resultsTitle.innerText = "Results";
+        matches = mockRoutes.filter(r => fuzzyMatch(r.name, query) || fuzzyMatch(r.busId, query) || r.stops.some(st => fuzzyMatch(st, query)));
+      }
+
+      if(matches.length === 0) {
+        resultsList.innerHTML = '<div style="text-align:center;padding:24px;color:#9CA3AF;font-size:14px;">No results found.</div>';
+        return;
+      }
+
+      matches.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div class="card-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="card-info">
+            <span class="card-title">${m.name}</span>
+            <span class="card-subtitle">Bus ${m.busId}</span>
+          </div>
+          <i class="fa-solid fa-chevron-right card-arrow"></i>
+        `;
+        div.onclick = () => launchTracking(m);
+        resultsList.appendChild(div);
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => renderList(e.target.value));
+
+    // Execution Core
+    function launchTracking(route) {
+      searchView.style.display = 'none';
+      trackingView.style.display = 'block';
+      
+      activeRouteParams = route;
+      globalStopIndex = 0; // reset
+      
+      document.getElementById('tv-badge').innerText = `Bus ${route.busId}`;
+      document.getElementById('tv-title').innerText = route.name;
+
+      renderTrackingFrame();
+      if(currentSimulationInterval) clearInterval(currentSimulationInterval);
+      
+      // Simulate real-time updates exactly every 10 seconds requirement
+      currentSimulationInterval = setInterval(() => {
+        globalStopIndex++;
+        if(globalStopIndex >= route.stops.length) globalStopIndex = 0; // loop
+        renderTrackingFrame();
+      }, 10000); 
+    }
+
+    function renderTrackingFrame() {
+      const stops = activeRouteParams.stops;
+      const totalStops = Math.max(1, stops.length - 1);
+      const isTerminal = globalStopIndex === totalStops;
+      const progress = Math.min(100, (globalStopIndex / totalStops) * 100);
+      
+      document.getElementById('tv-progress').style.width = `${progress}%`;
+      
+      const speed = isTerminal ? "0" : "42";
+      document.getElementById('tv-speed').innerText = `${speed} km/h`;
+      
+      const dot = document.getElementById('tv-dot');
+      const statusLbl = document.getElementById('tv-status');
+      if (speed === "0") {
+        dot.className = "status-dot amber";
+        statusLbl.innerText = isTerminal ? "Journey Complete" : "Stopped";
+      } else {
+        dot.className = "status-dot green";
+        statusLbl.innerText = "On time";
+      }
+
+      const nextStop = isTerminal ? stops[globalStopIndex] : stops[globalStopIndex+1];
+      document.getElementById('tv-stop').innerText = nextStop;
+
+      const etaContainer = document.getElementById('tv-eta-container');
+      if(isTerminal) {
+        etaContainer.innerHTML = 'Terminal <span style="font-size:32px;">Reached</span>';
+      } else {
+        const randEta = Math.floor(Math.random()*4)+2;
+        etaContainer.innerHTML = `Arriving in <span id="tv-eta">${randEta}</span> min`;
+      }
+
+      // Render Table Elements
+      const tbody = document.querySelector('#timeline-table tbody');
+      tbody.innerHTML = '';
+      
+      stops.forEach((stop, idx) => {
+        const isPast = idx < globalStopIndex;
+        const isCurrent = idx === globalStopIndex;
+        
+        const tr = document.createElement('tr');
+        if(isPast) tr.className = 'row-past';
+        if(isCurrent) tr.className = 'row-current';
+        
+        let estHtml = ``;
+        if(isPast) estHtml = `<span style="color:#10B981;font-weight:700;">Arrived</span>`;
+        else if(isCurrent) estHtml = `<span style="color:#1E3A8A;font-weight:700;">Arriving Now</span>`;
+        else estHtml = `~${idx * 15}m`;
+
+        const sched = `12:${(idx * 15).toString().padStart(2, '0')} PM`;
+
+        tr.innerHTML = `
+          <td>${isCurrent ? '<i class="fa-solid fa-bus" style="color:var(--gov-blue);margin-right:8px;"></i>' : ''}${stop}</td>
+          <td>${sched}</td>
+          <td>${estHtml}</td>
+          <td style="text-align:center;"><button class="alarm-btn" onclick="toggleAlarm(this)" title="Set alarm"><i class="fa-solid fa-bell"></i></button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleAlarm(btn) {
+      if(btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        alert("Station alarm deactivated.");
+      } else {
+        btn.classList.add('active');
+        if(Notification.permission !== "granted") {
+           Notification.requestPermission();
+        }
+        alert("Platform alarm activated via Service Worker. You will be notified 2 stops prior.");
+      }
+    }
+
+    function showSearch() {
+      if(currentSimulationInterval) clearInterval(currentSimulationInterval);
+      trackingView.style.display = 'none';
+      searchView.style.display = 'block';
+    }
+
+    function shareLocation() {
+      if(navigator.share) {
+        navigator.share({ title: 'SmartBus', text: 'Tracking Government Bus.', url: window.location.href}).catch(()=>{});
+      } else {
+        alert("Location status locked to clipboard.");
+      }
+    }
+
+    // Init
+    renderList("");
+  </script>
+</body>
+</html>

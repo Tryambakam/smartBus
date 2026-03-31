@@ -17,7 +17,7 @@ export default function App() {
         <Routes>
           {/* Public Shielded Arrays */}
           <Route path="/" element={<Navigate to="/welcome" replace />} />
-          <Route path="/welcome" element={<PublicRoute restricted={true}><Welcome /></PublicRoute>} />
+          <Route path="/welcome" element={<Welcome />} />
           <Route path="/login" element={<PublicRoute restricted={true}><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute restricted={true}><Register /></PublicRoute>} />
 

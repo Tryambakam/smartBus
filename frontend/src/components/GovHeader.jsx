@@ -72,19 +72,28 @@ export default function GovHeader({
             )}
           </button>
 
-          {/* Language Component */}
-          <div className="relative flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 px-3 py-1.5 rounded-xl transition-all font-medium text-sm text-slate-700 dark:text-slate-300 group cursor-pointer" title="Select Language">
-            <Globe size={16} className="mr-2 text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
-            <select 
-              className="bg-transparent font-bold outline-none cursor-pointer appearance-none pr-4 uppercase"
-              value={i18n.language.split('-')[0]}
-              onChange={(e) => setLang(e.target.value)}
-            >
-              <option value="en" className="text-slate-800 dark:text-slate-800">EN</option>
-              <option value="hi" className="text-slate-800 dark:text-slate-800">HI</option>
-              <option value="pa" className="text-slate-800 dark:text-slate-800">PA</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-2 opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          {/* Language Matrix Dropdown */}
+          <div className="relative group" title="Select Language">
+            <button className="flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 px-3 py-1.5 rounded-xl transition-all font-medium text-sm text-slate-700 dark:text-slate-300 cursor-pointer outline-none">
+              <Globe size={16} className="mr-2 text-slate-500 dark:text-slate-400 group-hover:text-[#1E3A8A] transition-colors" />
+              <span className="font-bold uppercase pr-1">{i18n.language.split('-')[0]}</span>
+              <ChevronDown size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+            </button>
+            
+            {/* Custom Floating Menu */}
+            <div className="absolute top-full right-0 mt-2 w-36 bg-white dark:bg-[#1C1C1E] border border-slate-200 dark:border-slate-800 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right translate-y-2 group-hover:translate-y-0 z-50">
+              <div className="py-1.5 flex flex-col items-center">
+                {['en', 'hi', 'pa'].map((lang) => (
+                  <button 
+                    key={lang}
+                    onClick={() => setLang(lang)}
+                    className={`w-full text-left px-4 py-2.5 text-[13px] font-[600] transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 ${i18n.language.split('-')[0] === lang ? 'text-[#1E3A8A] dark:text-[#4CA6FF] bg-blue-50/50 dark:bg-blue-900/10' : 'text-slate-600 dark:text-slate-300'}`}
+                  >
+                    {lang === 'en' ? 'English (EN)' : lang === 'hi' ? 'Hindi (HI)' : 'Punjabi (PA)'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
