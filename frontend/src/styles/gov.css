@@ -5,52 +5,52 @@
 ========================================================= */
 
 :root{
-  /* Apple Ecosystem Light Mode Tokens */
-  --bg: #F5F5F7;
-  --surface: rgba(255, 255, 255, 0.85);
-  --surface-2: rgba(255, 255, 255, 0.65);
-  --border: rgba(0, 0, 0, 0.08); /* Minimalistic light borders */
-  --text: #1D1D1F; /* Signature deep grey text */
-  --muted: #86868B;
+  /* Official Governmental Light Mode Tokens */
+  --bg: #F9FAFB;
+  --surface: #FFFFFF;
+  --surface-2: #F3F4F6;
+  --border: #E5E7EB;
+  --text: #1F2937;
+  --muted: #6B7280;
 
-  --primary: #007AFF; /* iOS/macOS Default Blue */
-  --primary-2: #0051C6;
-  --accent: #FF9500; /* iOS Orange */
+  --primary: #1E3A8A; /* Deep Gov Blue */
+  --primary-2: #1E40AF;
+  --accent: #F59E0B; /* Amber/Warning */
 
-  --success: #34C759;
-  --danger: #FF3B30;
-  --warn: #FFCC00;
-  --info: #007AFF;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warn: #F59E0B;
+  --info: #3B82F6;
 
-  --radius: 14px;
-  --radius-lg: 22px; /* Smoother, continuous curves */
+  --radius: 6px;
+  --radius-lg: 8px; /* Strict, minimal rounding */
 
-  --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.04);
-  --shadow: 0 12px 48px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --t-fast: 200ms;
-  --t-med: 300ms;
-  --t-slow: 500ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast: 150ms;
+  --t-med: 250ms;
+  --t-slow: 400ms;
 }
 
 :root[data-theme="dark"]{
-  /* Apple Ecosystem Dark Mode Tokens */
-  --bg: #000000;
-  --surface: rgba(28, 28, 30, 0.85);
-  --surface-2: rgba(44, 44, 46, 0.65);
-  --border: rgba(255, 255, 255, 0.12);
-  --text: #F5F5F7;
-  --muted: #98989D;
+  /* Official Governmental Dark Mode Tokens */
+  --bg: #111827;
+  --surface: #1F2937;
+  --surface-2: #374151;
+  --border: #374151;
+  --text: #F9FAFB;
+  --muted: #9CA3AF;
 
-  --primary: #0A84FF; /* iOS Dark Blue */
-  --primary-2: #409CFF;
-  --accent: #FF9F0A;
+  --primary: #3B82F6; /* Bright Gov Blue */
+  --primary-2: #60A5FA;
+  --accent: #FBBF24;
 
-  --shadow-soft: 0 8px 32px rgba(0,0,0,0.4);
-  --shadow: 0 16px 56px rgba(0,0,0,0.6);
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.8);
 }
 
 *{ box-sizing: border-box; }
@@ -108,12 +108,10 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
 ========================================================= */
 
 .gov-header{
-  background: var(--surface);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  color: var(--text);
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
+  background: var(--primary);
+  color: #FFFFFF;
+  padding: 12px 16px;
+  border-bottom: 3px solid var(--accent);
   flex: 0 0 auto;
 }
 
@@ -134,14 +132,15 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
 .gov-logo{
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
   flex: 0 0 auto;
+  color: #FFFFFF;
 }
 
 .gov-title{ line-height: 1.12; }
@@ -271,8 +270,8 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
   align-items: center;
   gap: 8px;
 
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
   font-size: 13px;
   line-height: 1.35;
 
@@ -282,15 +281,16 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
   max-width: min(820px, 92vw);
   animation: fadeIn 260ms var(--ease) both;
 }
-.alert b{ font-weight: 900; }
+.alert b{ font-weight: 700; color: var(--text); }
 .alert span{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.alert.info{ border-color: rgba(37,99,235,0.28); background: rgba(37,99,235,0.08); }
-.alert.warn{ border-color: rgba(245,158,11,0.30); background: rgba(245,158,11,0.10); }
-.alert.danger{ border-color: rgba(185,28,28,0.30); background: rgba(185,28,28,0.10); }
+.alert.info{ border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.05); color: var(--text); }
+.alert.warn{ border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); color: var(--text); }
+.alert.danger{ border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); color: var(--text); }
+:root[data-theme="dark"] .alert.warn { color: var(--text); }
 
 /* =========================================================
    Main Grid (FIX: responsive + no disappearing cards)
@@ -331,8 +331,6 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
 
 .card{
   background: var(--surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
@@ -343,54 +341,58 @@ html, body, .gov-shell, .card, .pill, .alert, .item, .btn, .input, .select{
 }
 
 .card-h{
-  padding: 12px 12px 10px 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border);
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 10px;
-  background: linear-gradient(180deg, var(--surface-2), transparent);
+  background: var(--surface-2);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
 }
 
 .card-h .h{
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.6px;
+  font-weight: 700;
+  font-size: 13px;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.card-b{ padding: 12px; }
+.card-b{ padding: 16px; }
 
 .label{
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 6px;
-  font-weight: 800;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .select, .btn, .input{
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--surface);
   font-size: 14px;
   color: var(--text);
+  font-weight: 500;
 }
 
 :root[data-theme="dark"] .select,
 :root[data-theme="dark"] .input{
-  background: rgba(15,23,42,0.65);
+  background: rgba(31,41,55,1);
   color: var(--text);
 }
 
 .btn{
   background: var(--primary);
-  border-color: var(--primary);
   color: #fff;
-  font-weight: 900;
+  font-weight: 700;
   cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn:hover{ background: var(--primary-2); transform: translateY(-1px); }
 .btn:active{ transform: translateY(0px); }
@@ -408,23 +410,22 @@ select:focus, button:focus, input:focus{
    Lists
 ========================================================= */
 
-.list{ display:flex; flex-direction:column; gap: 10px; }
+.list{ display:flex; flex-direction:column; gap: 8px; }
 
 .item{
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px;
+  border-radius: var(--radius);
+  padding: 12px;
   display:flex;
   justify-content:space-between;
   gap: 10px;
   background: var(--surface);
 }
 .item:hover{
-  border-color: rgba(148,163,184,0.55);
-  transform: translateY(-1px);
+  border-color: var(--primary);
 }
-.item b{ font-size: 13px; font-weight: 900; }
-.kv{ font-size: 12px; color: var(--muted); font-weight: 600; }
+.item b{ font-size: 14px; font-weight: 700; }
+.kv{ font-size: 13px; color: var(--muted); font-weight: 500; }
 
 /* =========================================================
    Map Card (CRITICAL: height that adapts)

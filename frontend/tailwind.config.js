@@ -11,9 +11,9 @@ module.exports = {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"Inter"', 'sans-serif'],
       },
       boxShadow: {
-        'apple': '0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
-        'apple-dark': '0 4px 24px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.2)',
-        'apple-float': '0 20px 40px -10px rgba(0,0,0,0.1), 0 10px 20px -5px rgba(0,0,0,0.05)',
+        'apple': '0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.04)',
+        'apple-dark': '0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.3)',
+        'apple-float': '0 8px 30px rgba(0,0,0,0.12)',
       },
       animation: {
         'spin-slow': 'spin 8s linear infinite',

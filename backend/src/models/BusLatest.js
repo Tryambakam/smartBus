@@ -31,6 +31,7 @@ const BusLatestSchema = new mongoose.Schema(
     },
 
     speed: { type: Number, default: 0 },
+    speedEma: { type: Number, default: 0 },
     timestamp: { type: Date, default: Date.now },
   },
   { versionKey: false }

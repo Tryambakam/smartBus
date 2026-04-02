@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const BusLatest = require("../models/BusLatest");
 const { requireAuth } = require("../middleware/auth");
+const { getBusEta } = require("../controllers/eta.controller");
 
 // GET /api/buses/live
 router.get("/buses/live", requireAuth, async (req, res) => {
@@ -34,5 +35,8 @@ router.get("/bus/:busId/latest", requireAuth, async (req, res) => {
     res.status(500).json({ ok: false, error: "DB read failed" });
   }
 });
+
+// GET /api/bus/:busId/eta
+router.get("/bus/:busId/eta", requireAuth, getBusEta);
 
 module.exports = router;

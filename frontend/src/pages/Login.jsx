@@ -39,7 +39,7 @@ export default function Login() {
       } else if (activeUser?.role === "operator") {
         nav("/operator");
       } else {
-        nav("/");
+        nav("/dashboard");
       }
     } catch (e) {
       setError(String(e?.message || e));
@@ -66,7 +66,7 @@ export default function Login() {
     // Hard-reload the window forcing AuthContext to re-evaluate against /api/auth/me interceptor natively
     if (sandboxRole === "admin") window.location.href = "/admin";
     else if (sandboxRole === "operator") window.location.href = "/operator";
-    else window.location.href = "/";
+    else window.location.href = "/dashboard";
   };
 
   return (
@@ -120,9 +120,10 @@ export default function Login() {
               </div>
 
               <button 
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/30 mt-6" 
+                className="w-full bg-[#1E3A8A] hover:bg-[#1e40af] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition-all shadow-sm mt-6 uppercase tracking-wider text-sm" 
                 type="submit" 
                 disabled={!canSubmit || loading}
+                style={{ color: '#ffffff' }}
               >
                 {loading ? "Authenticating Payload…" : "Secure Sign In"}
               </button>

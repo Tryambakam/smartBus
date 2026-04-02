@@ -1,5 +1,7 @@
 const BusLatest = require("../models/BusLatest");
 
+const BusLog = require("../models/BusLog");
+
 function isNumber(x) {
   return typeof x === "number" && Number.isFinite(x);
 }
@@ -41,11 +43,20 @@ exports.updateGps = async (req, res) => {
     const validOccupancy = ["Low", "Medium", "High"];
     if (!validOccupancy.includes(occupancy)) occupancy = "Low";
 
+    // Compute speedEma
+    const existingBus = await BusLatest.findOne({ busId });
+    const alpha = 0.2;
+    let newSpeedEma = speed;
+    if (existingBus && existingBus.speedEma != null) {
+      newSpeedEma = alpha * speed + (1 - alpha) * existingBus.speedEma;
+    }
+
     const doc = {
       busId,
       lat,
       lng,
       speed,
+      speedEma: newSpeedEma,
       routeId,
       busStatus,
       occupancy,
@@ -54,6 +65,19 @@ exports.updateGps = async (req, res) => {
     };
 
     const updated = await BusLatest.findOneAndUpdate({ busId }, doc, { upsert: true, new: true });
+
+    // Asynchronously log to BusLog for analytics/history
+    BusLog.create({
+      busId,
+      routeId,
+      lat,
+      lng,
+      speed,
+      busStatus,
+      occupancy,
+      location: doc.location,
+      timestamp: new Date()
+    }).catch(err => console.error("BusLog insert failed:", err));
 
     // Emit real-time event for connected clients (if socket exists)
     try {
