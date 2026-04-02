@@ -165,32 +165,7 @@ export default function Login() {
               </button>
             </div>
             
-            <div className="my-6 border-t border-slate-200 dark:border-slate-700"></div>
 
-            <div className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest text-center mb-4">Mock Environment (Offline Access)</div>
-            <div className="flex flex-col gap-2.5">
-              <button
-                type="button"
-                className="w-full flex justify-center items-center py-3.5 px-5 bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 text-sm font-bold rounded-xl transition-colors shadow-md"
-                onClick={() => handleOfflineDemo("admin")}
-              >
-                Demo as Admin
-              </button>
-              <button
-                type="button"
-                className="w-full flex justify-center items-center py-3.5 px-5 bg-emerald-600 border border-emerald-500 text-white hover:bg-emerald-500 text-sm font-bold rounded-xl transition-colors shadow-md"
-                onClick={() => handleOfflineDemo("operator")}
-              >
-                Demo as Operator
-              </button>
-              <button
-                type="button"
-                className="w-full flex justify-center items-center py-3.5 px-5 bg-blue-600 border border-blue-500 text-white hover:bg-blue-500 text-sm font-bold rounded-xl transition-colors shadow-md"
-                onClick={() => handleOfflineDemo("commuter")}
-              >
-                Demo as Commuter
-              </button>
-            </div>
           </div>
         </section>
       </motion.main>

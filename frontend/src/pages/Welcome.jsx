@@ -52,21 +52,17 @@ export default function Welcome() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-md lg:max-w-none"
+            className="flex flex-col items-center lg:items-start gap-4 w-full justify-center lg:justify-start"
           >
-            <Link
-              to="/login"
-              className="w-full sm:w-auto px-8 py-3.5 bg-[#0a3161] hover:bg-[#072448] text-white font-semibold text-sm sm:text-base transition-colors border border-[#0a3161]"
-            >
-              Public Dashboard & Live Map
-            </Link>
-
-            <Link
-              to="/login"
-              className="w-full sm:w-auto px-8 py-3.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-semibold text-sm sm:text-base transition-colors border border-gray-300 dark:border-gray-700 bg-white dark:bg-transparent"
-            >
-              Authorized Agency Login
-            </Link>
+            <p className="text-gray-600 dark:text-gray-400 font-medium text-lg mt-4 border border-gray-300 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-[#1a1d24]">
+              New Here?{" "}
+              <Link
+                to="/register"
+                className="text-[#0a3161] dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors font-semibold ml-1"
+              >
+                Create Account
+              </Link>
+            </p>
           </motion.div>
 
           {/* Footer Checks */}

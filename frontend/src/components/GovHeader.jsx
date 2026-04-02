@@ -123,7 +123,10 @@ export default function GovHeader({
               </button>
             </>
           ) : (
-            <Link className="flex items-center gap-2 bg-slate-900 dark:bg-white hover:opacity-80 text-white dark:text-slate-900 px-4 py-2 rounded-full transition-all font-[600] text-[13px] shadow-sm ml-2" to="/login">
+            <Link 
+              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] text-white px-5 py-2 rounded transition-colors font-semibold text-[13px] ml-2" 
+              to="/login"
+            >
               <LogIn size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline-block">{t("app.login")}</span>
             </Link>
