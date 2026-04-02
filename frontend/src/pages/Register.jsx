@@ -52,10 +52,10 @@ export default function Register() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
-        <section className="bg-white dark:bg-slate-800 shadow-xl rounded-2xl w-full max-w-md border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-8 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex flex-col items-center">
-            <h2 className="text-2xl font-[800] text-slate-900 dark:text-white mb-1 tracking-tight">Provision Profile</h2>
-            <div className="text-slate-500 text-[11px] uppercase tracking-widest font-[800]">Identity Registration</div>
+        <section className="bg-white dark:bg-[#111111] shadow-none rounded-none w-full max-w-md border border-gray-300 dark:border-gray-700 border-t-4 border-t-[#0a3161] overflow-hidden">
+          <div className="p-8 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1d24] flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Provision Profile</h2>
+            <div className="text-gray-500 text-[11px] uppercase tracking-widest font-black">Identity Registration</div>
           </div>
 
           <div className="p-8">
@@ -63,7 +63,7 @@ export default function Register() {
               <div>
                 <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                 <input
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm"
+                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="System alias"
@@ -74,7 +74,7 @@ export default function Register() {
               <div>
                 <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Username Hardware ID</label>
                 <input
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm"
+                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Unique identifier"
@@ -85,7 +85,7 @@ export default function Register() {
               <div>
                 <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Cryptographic Key</label>
                 <input
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all shadow-sm"
+                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -96,7 +96,7 @@ export default function Register() {
 
               <div className="pt-2">
                 <button 
-                  className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-[700] py-3 rounded-xl transition-all shadow-lg shadow-blue-600/30" 
+                  className="w-full bg-[#0a3161] hover:bg-[#072448] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-none transition-colors border border-[#0a3161] uppercase tracking-wider text-sm" 
                   type="submit" 
                   disabled={!canSubmit || loading}
                 >

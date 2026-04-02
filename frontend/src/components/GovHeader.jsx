@@ -29,7 +29,7 @@ export default function GovHeader({
   const setLang = (lng) => i18n.changeLanguage(lng);
 
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-3xl bg-white/60 dark:bg-[#000000]/60 border-b border-black-[0.02] dark:border-white/5 transition-colors duration-500" role="banner">
+    <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#111111] border-b border-gray-300 dark:border-gray-800 transition-colors duration-500" role="banner">
       <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* Premium Brand & Menu */}
@@ -37,7 +37,7 @@ export default function GovHeader({
           {isAuthed && (
             <button 
               onClick={() => window.dispatchEvent(new Event('smartbus:toggle-sidebar'))}
-              className="p-2 -ml-2 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors focus:outline-none"
+              className="p-2 -ml-2 text-gray-700 hover:text-[#0a3161] dark:text-gray-300 dark:hover:text-white bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors focus:outline-none"
               title="Toggle Navigation Menu"
             >
               <Menu size={22} strokeWidth={2.5} />
@@ -63,7 +63,7 @@ export default function GovHeader({
           {/* Notifications Bell */}
           <button
             onClick={onOpenNotices}
-            className="relative p-2 text-slate-600 hover:text-blue-500 dark:text-slate-300 dark:hover:text-blue-400 bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 border border-transparent rounded-full transition-all duration-200 focus:outline-none"
+            className="relative p-2 text-gray-600 hover:text-[#0a3161] dark:text-gray-300 dark:hover:text-white bg-gray-50 hover:bg-gray-100 dark:bg-[#1a1d24] dark:hover:bg-[#20242e] border border-gray-300 dark:border-gray-700 rounded transition-colors focus:outline-none"
             title="Public Notices"
           >
             <Bell size={18} strokeWidth={2.5} />
@@ -74,14 +74,14 @@ export default function GovHeader({
 
           {/* Language Matrix Dropdown */}
           <div className="relative group" title="Select Language">
-            <button className="flex items-center hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 px-3 py-1.5 rounded-xl transition-all font-medium text-sm text-slate-700 dark:text-slate-300 cursor-pointer outline-none">
+            <button className="flex items-center hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-300 dark:hover:border-gray-700 px-3 py-1.5 rounded transition-all font-medium text-sm text-gray-700 dark:text-gray-300 cursor-pointer outline-none">
               <Globe size={16} className="mr-2 text-slate-500 dark:text-slate-400 group-hover:text-[#1E3A8A] transition-colors" />
               <span className="font-bold uppercase pr-1">{i18n.language.split('-')[0]}</span>
               <ChevronDown size={14} className="opacity-50 group-hover:opacity-100 transition-opacity" />
             </button>
             
             {/* Custom Floating Menu */}
-            <div className="absolute top-full right-0 mt-2 w-36 bg-white dark:bg-[#1C1C1E] border border-slate-200 dark:border-slate-800 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right translate-y-2 group-hover:translate-y-0 z-50">
+            <div className="absolute top-full right-0 mt-2 w-36 bg-white dark:bg-[#111318] border border-gray-300 dark:border-gray-800 rounded shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
               <div className="py-1.5 flex flex-col items-center">
                 {['en', 'hi', 'pa'].map((lang) => (
                   <button 
@@ -100,7 +100,7 @@ export default function GovHeader({
 
           {/* Theme Toggle */}
           <button 
-            className="flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 px-3 py-2 rounded-full transition-all font-[500] text-[13px] text-slate-700 dark:text-slate-300"
+            className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-2 rounded transition-colors font-medium text-[13px] text-gray-700 dark:text-gray-300"
             onClick={onToggleTheme} 
             aria-label="Toggle theme"
           >
@@ -112,7 +112,7 @@ export default function GovHeader({
           {isAuthed ? (
             <>
               <button
-                className="flex items-center gap-2 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-rose-500 dark:text-rose-400 px-3 py-2 rounded-full transition-all font-[600] text-[13px]"
+                className="flex items-center gap-2 text-rose-600 hover:text-white dark:text-rose-400 dark:hover:text-white bg-transparent hover:bg-rose-600 dark:hover:bg-rose-500 border border-transparent hover:border-rose-600 dark:hover:border-rose-500 px-3 py-2 rounded transition-colors font-semibold text-[13px]"
                 onClick={async () => {
                   await logout();
                   nav("/welcome");

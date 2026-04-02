@@ -139,23 +139,23 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           
           {/* Routes Pane */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-200 dark:border-slate-700 overflow-hidden col-span-1">
+          <section className="bg-white dark:bg-[#111111] rounded-none shadow-none border border-gray-300 dark:border-gray-700 border-t-2 border-t-[#0a3161] overflow-hidden col-span-1">
             <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
               <h3 className="font-bold tracking-tight text-slate-800 dark:text-white">Transit Routes</h3>
               <div className="text-xs text-slate-500 font-medium tracking-tight">System Path Networks</div>
             </div>
             <div className="p-5">
               <div className="space-y-3 mb-5">
-                <input className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none" placeholder="Route ID (e.g. R-101)" value={newRouteId} onChange={(e) => setNewRouteId(e.target.value)} />
-                <input className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none" placeholder="Route Name" value={newRouteName} onChange={(e) => setNewRouteName(e.target.value)} />
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-sm shadow-sm transition-colors" onClick={handleCreateRoute}>Initialize Route</button>
+                <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161] transition-colors" placeholder="Route ID (e.g. R-101)" value={newRouteId} onChange={(e) => setNewRouteId(e.target.value)} />
+                <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161] transition-colors" placeholder="Route Name" value={newRouteName} onChange={(e) => setNewRouteName(e.target.value)} />
+                <button className="w-full bg-[#0a3161] hover:bg-[#072448] text-white font-semibold py-2 rounded-none text-sm transition-colors border border-[#0a3161]" onClick={handleCreateRoute}>Initialize Route</button>
               </div>
 
               <div className="border-t border-slate-100 dark:border-slate-700 pt-4">
                 {routesLoading ? <div className="text-sm font-bold animate-pulse text-slate-400">Loading pipelines...</div> : (
                   <div className="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
                     {routes.map(r => (
-                      <div key={r.routeId} onClick={() => setSelectedRoute(r)} className={`p-3 rounded-xl border cursor-pointer transition-all flex justify-between items-center ${selectedRoute?.routeId === r.routeId ? "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800" : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-300"}`}>
+                      <div key={r.routeId} onClick={() => setSelectedRoute(r)} className={`p-3 rounded-sm border cursor-pointer transition-all flex justify-between items-center ${selectedRoute?.routeId === r.routeId ? "bg-blue-50 border-blue-300 dark:bg-[#1a1d24] dark:border-blue-500" : "bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800 hover:border-gray-400"}`}>
                         <div>
                           <div className="text-sm font-bold text-slate-900 dark:text-white">{r.routeId}</div>
                           <div className="text-[11px] text-slate-500 leading-tight mt-0.5">{r.name}</div>
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           </section>
 
           {/* Stops Pane */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-200 dark:border-slate-700 overflow-hidden col-span-2">
+          <section className="bg-white dark:bg-[#111111] rounded-none shadow-none border border-gray-300 dark:border-gray-700 border-t-2 border-t-[#0a3161] overflow-hidden col-span-2">
             <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
               <h3 className="font-bold tracking-tight text-slate-800 dark:text-white">Waypoints {selectedRoute ? `[ ${selectedRoute.routeId} ]` : ""}</h3>
               <div className="text-xs text-slate-500 font-medium tracking-tight">Geo-Coordinate Matrices</div>
@@ -180,20 +180,20 @@ export default function AdminDashboard() {
               {!selectedRoute ? <div className="text-sm font-bold text-slate-400 flex items-center justify-center p-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">Select a primary Route to manage Waypoints</div> : (
                 <div className="flex flex-col h-full">
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-                    <input className="text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white outline-none" placeholder="Stop ID" value={newStop.stopId} onChange={e => setNewStop(v => ({ ...v, stopId: e.target.value }))} />
-                    <input className="text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white outline-none" placeholder="Name (EN)" value={newStop.name_en} onChange={e => setNewStop(v => ({ ...v, name_en: e.target.value }))} />
-                    <input className="text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white outline-none" placeholder="Lat" value={newStop.lat} onChange={e => setNewStop(v => ({ ...v, lat: e.target.value }))} />
-                    <input className="text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white outline-none" placeholder="Lng" value={newStop.lng} onChange={e => setNewStop(v => ({ ...v, lng: e.target.value }))} />
-                    <input className="text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white outline-none" placeholder="Seq" value={newStop.sequence} onChange={e => setNewStop(v => ({ ...v, sequence: e.target.value }))} />
+                    <input className="text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161]" placeholder="Stop ID" value={newStop.stopId} onChange={e => setNewStop(v => ({ ...v, stopId: e.target.value }))} />
+                    <input className="text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161]" placeholder="Name (EN)" value={newStop.name_en} onChange={e => setNewStop(v => ({ ...v, name_en: e.target.value }))} />
+                    <input className="text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161]" placeholder="Lat" value={newStop.lat} onChange={e => setNewStop(v => ({ ...v, lat: e.target.value }))} />
+                    <input className="text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161]" placeholder="Lng" value={newStop.lng} onChange={e => setNewStop(v => ({ ...v, lng: e.target.value }))} />
+                    <input className="text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white outline-none focus:border-[#0a3161]" placeholder="Seq" value={newStop.sequence} onChange={e => setNewStop(v => ({ ...v, sequence: e.target.value }))} />
                   </div>
                   
-                  <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mb-5 shadow-sm" onClick={handleCreateStop}>Append Waypoint</button>
+                  <button className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2.5 rounded-none text-sm transition-colors mb-5 border border-emerald-700" onClick={handleCreateStop}>Append Waypoint</button>
                   
                   <div className="border-t border-slate-100 dark:border-slate-700 pt-4 flex-1">
                     {stopsLoading ? <div className="text-sm font-bold animate-pulse text-slate-400">Syncing telemetry arrays...</div> : (
                       <div className="flex flex-col gap-2 max-h-56 overflow-y-auto">
                         {stops.map((s) => (
-                          <div key={s.stopId} className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 p-3 rounded-xl hover:border-emerald-300 transition-colors">
+                          <div key={s.stopId} className="flex justify-between items-center bg-gray-50 dark:bg-[#1a1d24] border border-gray-200 dark:border-gray-800 p-3 rounded-sm hover:border-emerald-500 transition-colors">
                             <div className="flex items-center gap-4">
                               <span className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400 font-bold text-xs px-2 py-1 rounded">SEQ {s.sequence}</span>
                               <div>
@@ -214,13 +214,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* BOTTOM USER MANAGEMENT GRID (TABLE) */}
-        <section className="bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <section className="bg-white dark:bg-[#111111] rounded-none shadow-none border border-gray-300 dark:border-gray-700 border-t-2 border-t-[#0a3161] overflow-hidden">
           <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
             <div>
               <h3 className="font-bold tracking-tight text-slate-800 dark:text-white">Organization Roster</h3>
               <div className="text-[11px] text-slate-500 font-black uppercase tracking-widest mt-0.5">Role-Based Access Control</div>
             </div>
-            <button onClick={() => openUserModal()} className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-colors">
+            <button onClick={() => openUserModal()} className="bg-[#0a3161] hover:bg-[#072448] border border-[#0a3161] text-white text-sm font-bold px-4 py-2 rounded-sm transition-colors">
               + Provision Identity
             </button>
           </div>
@@ -254,9 +254,13 @@ export default function AdminDashboard() {
                         {u.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 space-x-2 text-right">
-                      <button onClick={() => openUserModal(u)} className="text-[11px] font-bold tracking-tight text-blue-600 hover:text-blue-800 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded transition-colors">Config</button>
-                      <button onClick={() => handleDeleteUser(u._id)} className="text-[11px] font-bold tracking-tight text-rose-500 hover:text-rose-700 dark:text-rose-400 uppercase bg-rose-50 dark:bg-rose-900/20 px-3 py-1.5 rounded transition-colors">Purge</button>
+                    <td className="px-6 py-4 text-right flex justify-end gap-2 text-sm font-medium">
+                      <button onClick={() => openUserModal(u)} className="bg-[#0a3161] hover:bg-[#072448] text-white text-xs font-bold px-3 py-1.5 rounded-none transition-colors uppercase tracking-widest border border-[#0a3161]">
+                        Config
+                      </button>
+                      <button onClick={() => handleDeleteUser(u._id)} className="bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold px-3 py-1.5 rounded-none transition-colors uppercase tracking-widest border border-rose-700">
+                        Purge
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -278,7 +282,7 @@ export default function AdminDashboard() {
       {/* USER MUTATION MODAL OVERLAY */}
       {userModal.open && (
         <div className="fixed inset-0 z-[200] bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-[#111111] w-full max-w-sm rounded-none border border-gray-300 dark:border-gray-700 border-t-4 border-t-[#0a3161] shadow-none overflow-hidden">
             <div className="p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60">
               <h4 className="font-bold text-slate-900 dark:text-white">{userModal.editingMap ? "Configure Identity" : "Provision Identity"}</h4>
               <p className="text-xs font-medium text-slate-500">Mutate matrix payloads directly over the MongoDB instance</p>
@@ -287,15 +291,15 @@ export default function AdminDashboard() {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 mb-1">Handle</label>
-                <input className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" value={userModal.username} onChange={e => setUserModal({...userModal, username: e.target.value})} placeholder="Explicit identifier" autoComplete="off" />
+                <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white focus:outline-none focus:border-[#0a3161]" value={userModal.username} onChange={e => setUserModal({...userModal, username: e.target.value})} placeholder="Explicit identifier" autoComplete="off" />
               </div>
               <div>
                 <label className="block text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 mb-1">Encrypted Payload (Password)</label>
-                <input className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" type="password" value={userModal.password} onChange={e => setUserModal({...userModal, password: e.target.value})} placeholder={userModal.editingMap ? "Leave empty to preserve signature" : "••••••••"} autoComplete="new-password" />
+                <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white focus:outline-none focus:border-[#0a3161]" type="password" value={userModal.password} onChange={e => setUserModal({...userModal, password: e.target.value})} placeholder={userModal.editingMap ? "Leave empty to preserve signature" : "••••••••"} autoComplete="new-password" />
               </div>
               <div>
                 <label className="block text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 mb-1">Permission Tier</label>
-                <select className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" value={userModal.role} onChange={e => setUserModal({...userModal, role: e.target.value})}>
+                <select className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] dark:text-white focus:outline-none focus:border-[#0a3161]" value={userModal.role} onChange={e => setUserModal({...userModal, role: e.target.value})}>
                   <option value="commuter">Commuter (Read-Only Matrix)</option>
                   <option value="operator">Operator (Telemetry Push)</option>
                   <option value="admin">Administrator (Full Orchestration)</option>
@@ -306,15 +310,15 @@ export default function AdminDashboard() {
                 {userModal.role === 'operator' && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <label className="block text-[11px] font-black tracking-widest uppercase text-slate-500 dark:text-slate-400 mb-1 mt-1">Hardware ID Assigment (Bus ID)</label>
-                    <input className="w-full text-sm py-2 px-3 border border-slate-300 dark:border-emerald-600/50 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 focus:ring-2 focus:ring-emerald-500 outline-none text-emerald-900 dark:text-emerald-300 font-bold" value={userModal.busId || ''} onChange={e => setUserModal({...userModal, busId: e.target.value})} placeholder="e.g. BUS-101" />
+                    <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-emerald-800 rounded-none bg-emerald-50 dark:bg-emerald-900/10 focus:outline-none focus:border-emerald-600 text-emerald-900 dark:text-emerald-300 font-bold" value={userModal.busId || ''} onChange={e => setUserModal({...userModal, busId: e.target.value})} placeholder="e.g. BUS-101" />
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <div className="p-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700 flex gap-3 justify-end">
-              <button className="px-5 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg shadow-sm hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors" onClick={() => setUserModal({...userModal, open: false})}>Abort</button>
-              <button disabled={!userModal.username || (!userModal.editingMap && !userModal.password)} className="px-5 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-colors" onClick={handleSaveUser}>Deploy Node</button>
+            <div className="p-5 bg-gray-50 dark:bg-[#1a1d24] border-t border-gray-200 dark:border-gray-700 flex gap-3 justify-end">
+              <button className="px-5 py-2 text-sm font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-[#111111] border border-gray-300 dark:border-gray-600 rounded-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" onClick={() => setUserModal({...userModal, open: false})}>Abort</button>
+              <button disabled={!userModal.username || (!userModal.editingMap && !userModal.password)} className="px-5 py-2 text-sm font-bold text-white bg-[#0a3161] hover:bg-[#072448] disabled:opacity-50 disabled:cursor-not-allowed rounded-none border border-[#0a3161] transition-colors" onClick={handleSaveUser}>Deploy Node</button>
             </div>
           </motion.div>
         </div>

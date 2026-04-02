@@ -69,7 +69,7 @@ export default function SidebarNavigation() {
       >
         {/* Universal Close Action */}
         <button 
-          className="absolute top-4 right-4 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white rounded-full bg-slate-100 dark:bg-slate-800 transition-colors focus:outline-none"
+          className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-sm bg-gray-100 dark:bg-gray-800 transition-colors focus:outline-none"
           onClick={() => setIsOpen(false)}
         >
           <X size={20} />
@@ -79,10 +79,10 @@ export default function SidebarNavigation() {
         <div className="p-6 pb-8 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-4">
             {/* Avatar */}
-            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-lg font-[800] text-[#1e3a8a] dark:text-[#4CA6FF] shadow-inner shrink-0 relative">
+            <div className="w-12 h-12 rounded-sm bg-gray-50 dark:bg-[#1a1d24] border border-gray-300 dark:border-gray-700 flex items-center justify-center text-lg font-bold text-[#0a3161] dark:text-blue-400 shrink-0 relative">
               {getInitials(displayName)}
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white dark:bg-[#111111] rounded-full flex items-center justify-center pb-[1px] pl-[1px]">
-                 <BadgeCheck size={16} className="text-[#10B981]" strokeWidth={3} />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white dark:bg-[#111111] rounded-sm flex items-center justify-center pb-[1px] pl-[1px]">
+                 <BadgeCheck size={16} className="text-[#10B981]" strokeWidth={2.5} />
               </div>
             </div>
             
@@ -92,10 +92,10 @@ export default function SidebarNavigation() {
                  {displayName}
                </span>
                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-[800] uppercase tracking-wider bg-[#1e3a8a]/10 dark:bg-[#4CA6FF]/10 text-[#1e3a8a] dark:text-[#4CA6FF]">
+                  <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-widest border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                      {displayRole}
                   </span>
-                  <span className="text-xs font-[600] text-emerald-600 dark:text-emerald-500">Verified</span>
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-500">Verified</span>
                </div>
             </div>
           </div>
@@ -107,16 +107,16 @@ export default function SidebarNavigation() {
           {menuItems.map((item) => {
              const isActive = location.pathname.includes(item.path);
              const activeClasses = isActive 
-               ? "bg-[#1e3a8a] text-white shadow-md font-[700]" 
-               : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-[600]";
+               ? "bg-[#0a3161] text-white border-l-4 border-blue-400 font-bold" 
+               : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 border-l-4 border-transparent hover:border-gray-300 dark:hover:border-gray-600 font-medium";
                
              return (
                <button
                  key={item.name}
                  onClick={() => navigate(item.path)}
-                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 outline-none ${activeClasses}`}
+                 className={`flex items-center gap-3 w-full px-4 py-3 rounded-none transition-all duration-200 outline-none ${activeClasses}`}
                >
-                 <item.icon size={20} className={isActive ? "text-white/90" : "text-slate-400"} strokeWidth={isActive ? 2.5 : 2} />
+                 <item.icon size={20} className={isActive ? "text-white" : "text-gray-400"} strokeWidth={isActive ? 2 : 1.5} />
                  <span className="text-[14px]">{item.name}</span>
                </button>
              );
@@ -127,9 +127,9 @@ export default function SidebarNavigation() {
         <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-black/30">
           <button 
             onClick={handleLogout}
-            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1C1C1E] text-rose-600 dark:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors font-[700] text-sm shadow-sm"
+            className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a1d24] text-rose-600 dark:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors font-bold text-sm"
           >
-            <LogOut size={18} strokeWidth={2.5} />
+            <LogOut size={18} strokeWidth={2} />
             End Secure Session
           </button>
           

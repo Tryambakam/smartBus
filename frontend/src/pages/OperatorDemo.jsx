@@ -139,11 +139,11 @@ export default function OperatorDemo() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
       >
-        <section className="bg-white/70 dark:bg-[#1C1C1E]/80 backdrop-blur-3xl rounded-[32px] shadow-apple-float border border-black-[0.02] dark:border-white/5 overflow-hidden w-full transition-colors duration-500">
-          <div className="p-6 border-b border-black/5 dark:border-white/5 bg-slate-50/50 dark:bg-black/20 flex items-center justify-between">
+        <section className="bg-white dark:bg-[#111111] rounded-none shadow-none border border-gray-300 dark:border-gray-700 border-t-4 border-t-[#0a3161] overflow-hidden w-full transition-colors duration-500">
+          <div className="p-6 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1d24] flex items-center justify-between">
             <div>
-              <div className="text-xl font-[800] text-slate-900 dark:text-white">Operator Console</div>
-              <div className="text-[13px] font-[500] text-slate-500 dark:text-slate-400 mt-0.5">Hardware Matrix Simulation</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">Operator Console</div>
+              <div className="text-[13px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 tracking-widest uppercase">Hardware Matrix Simulation</div>
             </div>
           </div>
           <div className="p-6 md:p-8">
@@ -165,16 +165,16 @@ export default function OperatorDemo() {
                     </span>
                   )}
                 </div>
-                <input className={`input ${jwtBusId ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-not-allowed' : ''}`} value={busId} onChange={(e) => setBusId(e.target.value)} readOnly={!!jwtBusId} />
+                <input className={`w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] text-gray-900 dark:text-white outline-none focus:border-[#0a3161] ${jwtBusId ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 cursor-not-allowed' : ''}`} value={busId} onChange={(e) => setBusId(e.target.value)} readOnly={!!jwtBusId} />
               </div>
               <div>
-                <div className="label">Route ID (optional)</div>
-                <input className="input" value={routeId} onChange={(e) => setRouteId(e.target.value)} />
+                <div className="label font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">Route ID (optional)</div>
+                <input className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] text-gray-900 dark:text-white outline-none focus:border-[#0a3161]" value={routeId} onChange={(e) => setRouteId(e.target.value)} />
               </div>
               <div>
-                <div className="label">Speed (km/h)</div>
+                <div className="label font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">Speed (km/h)</div>
                 <input
-                  className="input"
+                  className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] text-gray-900 dark:text-white outline-none focus:border-[#0a3161]"
                   type="number"
                   value={speed}
                   onChange={(e) => setSpeed(e.target.value)}
@@ -196,8 +196,8 @@ export default function OperatorDemo() {
                 </div>
               </div>
               <div>
-                <div className="label">Bus Status</div>
-                <select className="input" value={busStatus} onChange={(e) => setBusStatus(e.target.value)}>
+                <div className="label font-mono text-xs uppercase tracking-widest text-gray-500 mb-1">Bus Status</div>
+                <select className="w-full text-sm py-2 px-3 border border-gray-300 dark:border-gray-700 rounded-none bg-white dark:bg-[#1a1d24] text-gray-900 dark:text-white outline-none focus:border-[#0a3161]" value={busStatus} onChange={(e) => setBusStatus(e.target.value)}>
                   <option value="On Route">On Route</option>
                   <option value="Stopped">Stopped</option>
                   <option value="Out of Service">Out of Service</option>
@@ -208,10 +208,10 @@ export default function OperatorDemo() {
             <div className="h-px bg-black/5 dark:bg-white/10 my-6" />
 
             <div className="flex gap-3 flex-wrap mt-6">
-              <button className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-3 rounded-full font-[700] text-[14px] shadow-md transition-all active:scale-95" onClick={start}>
+              <button className="bg-emerald-700 hover:bg-emerald-800 text-white border border-emerald-700 px-6 py-3 rounded-none font-bold text-[14px] transition-colors" onClick={start}>
                 Start transmitting location
               </button>
-              <button className="bg-rose-500 hover:bg-rose-400 text-white px-6 py-3 rounded-full font-[700] text-[14px] shadow-md transition-all active:scale-95" onClick={stop}>
+              <button className="bg-rose-700 hover:bg-rose-800 text-white border border-rose-700 px-6 py-3 rounded-none font-bold text-[14px] transition-colors" onClick={stop}>
                 Stop
               </button>
             </div>
@@ -219,10 +219,10 @@ export default function OperatorDemo() {
             <div className="h-px bg-black/5 dark:bg-white/10 my-6" />
 
             <div className="flex gap-3 flex-wrap">
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-full font-[600] text-[13px] shadow-sm transition-all active:scale-95" onClick={handleAnnounce}>
+              <button className="bg-[#0a3161] hover:bg-[#072448] border border-[#0a3161] text-white px-5 py-2.5 rounded-none font-bold text-[13px] transition-colors" onClick={handleAnnounce}>
                 Announce Next Stop
               </button>
-              <button className="bg-amber-500 hover:bg-amber-400 text-white px-5 py-2.5 rounded-full font-[600] text-[13px] shadow-sm transition-all active:scale-95" onClick={() => setShowDelayModal(true)}>
+              <button className="bg-amber-600 hover:bg-amber-700 border border-amber-600 text-white px-5 py-2.5 rounded-none font-bold text-[13px] transition-colors" onClick={() => setShowDelayModal(true)}>
                 Report Delay...
               </button>
             </div>
@@ -269,26 +269,23 @@ export default function OperatorDemo() {
           >
             <motion.div
               initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              style={{
-                backgroundColor: "white", padding: 24, borderRadius: 12, width: "100%", maxWidth: 320,
-                boxShadow: "0 10px 25px rgba(0,0,0,0.2)"
-              }}
+              className="bg-white dark:bg-[#111111] p-6 rounded-none w-full max-w-sm border border-gray-300 dark:border-gray-700"
             >
-              <h3 style={{ marginTop: 0, color: "#0f172a", fontSize: "1.25rem", fontWeight: "bold" }}>Report Delay</h3>
-              <p style={{ fontSize: 14, color: "#64748b", mb: 16 }}>Select the reason for the transit delay to notify central systems immediately.</p>
+              <h3 className="mt-0 text-gray-900 dark:text-white text-xl font-bold">Report Delay</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 tracking-tight">Select the reason for the transit delay to notify central systems immediately.</p>
               
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24, marginTop: 16 }}>
+              <div className="flex flex-col gap-3 mb-6 mt-4">
                 {["Traffic", "Mechanical", "Weather", "Emergency"].map(r => (
-                  <label key={r} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "#334155", fontWeight: "500" }}>
-                    <input type="radio" name="delayReason" value={r} checked={delayReason === r} onChange={(e) => setDelayReason(e.target.value)} style={{ width: 16, height: 16 }} />
+                  <label key={r} className="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 font-medium">
+                    <input type="radio" name="delayReason" value={r} checked={delayReason === r} onChange={(e) => setDelayReason(e.target.value)} className="w-4 h-4" />
                     {r}
                   </label>
                 ))}
               </div>
 
-              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                <button className="select" onClick={() => setShowDelayModal(false)}>Cancel</button>
-                <button className="btn" style={{ backgroundColor: "#b91c1c" }} onClick={handleReportDelayConfirm}>Confirm Delay</button>
+              <div className="flex gap-3 justify-end border-t border-gray-200 dark:border-gray-800 pt-4">
+                <button className="px-4 py-2 font-bold text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 rounded-none transition-colors" onClick={() => setShowDelayModal(false)}>Cancel</button>
+                <button className="px-4 py-2 font-bold text-sm bg-rose-700 hover:bg-rose-800 text-white border border-rose-700 rounded-none transition-colors" onClick={handleReportDelayConfirm}>Confirm Delay</button>
               </div>
             </motion.div>
           </motion.div>
