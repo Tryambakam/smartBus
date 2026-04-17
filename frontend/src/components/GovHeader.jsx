@@ -112,7 +112,7 @@ export default function GovHeader({
           {isAuthed ? (
             <>
               <button
-                className="flex items-center gap-2 text-rose-600 hover:text-white dark:text-rose-400 dark:hover:text-white bg-transparent hover:bg-rose-600 dark:hover:bg-rose-500 border border-transparent hover:border-rose-600 dark:hover:border-rose-500 px-3 py-2 rounded transition-colors font-semibold text-[13px]"
+                className="flex items-center gap-2 text-rose-600 hover:text-white dark:text-rose-400 dark:hover:text-white bg-transparent hover:bg-rose-600 dark:hover:bg-rose-500 border border-transparent hover:border-rose-600 dark:hover:border-rose-500 px-3 py-2 rounded-none transition-colors font-semibold text-[13px]"
                 onClick={async () => {
                   await logout();
                   nav("/welcome");
@@ -124,7 +124,7 @@ export default function GovHeader({
             </>
           ) : (
             <Link 
-              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] text-white px-5 py-2 rounded transition-colors font-semibold text-[13px] ml-2" 
+              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-5 py-2 rounded-none transition-colors font-semibold text-[13px] ml-2" 
               to="/login"
             >
               <LogIn size={16} strokeWidth={2.5} />
