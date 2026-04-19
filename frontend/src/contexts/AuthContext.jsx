@@ -30,21 +30,21 @@ export function AuthProvider({ children }) {
     return () => { isMounted = false; };
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (identity, password) => {
     const data = await apiFetch(`/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ identity, password })
     });
     setUser(data.user);
     return data.user;
   };
 
-  const register = async (name, username, password) => {
+  const register = async (name, email, mobile, state, district, password) => {
     const data = await apiFetch(`/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, username, password })
+      body: JSON.stringify({ name, email, mobile, state, district, password })
     });
     setUser(data.user);
     return data.user;

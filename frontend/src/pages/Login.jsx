@@ -11,7 +11,7 @@ export default function Login() {
   const { theme, toggleTheme } = useTheme();
   
   const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function Login() {
   useEffect(() => {
     const q = new URLSearchParams(loc.search);
     if (q.get("demo") === "1") {
-      setUsername("admin");
+      setIdentity("admin");
       setPassword("pass");
     }
   }, [loc.search]);
@@ -30,7 +30,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const activeUser = await login(username.trim(), password);
+      const activeUser = await login(identity.trim(), password);
       if (activeUser?.role === "admin") {
         nav("/admin");
       } else if (activeUser?.role === "operator") {
@@ -45,10 +45,10 @@ export default function Login() {
     }
   }
 
-  const canSubmit = username.trim() && password;
+  const canSubmit = identity.trim() && password;
 
-  function loadDemo(u, p) {
-    setUsername(u);
+  function loadDemo(i, p) {
+    setIdentity(i);
     setPassword(p);
   }
 
@@ -76,20 +76,20 @@ export default function Login() {
                 className={`h-14 mb-4 transition-all duration-300 ${theme === 'dark' ? 'filter brightness-0 invert opacity-40' : 'opacity-60'}`}
               />
               <h2 className="text-[20px] font-black uppercase tracking-widest text-[#0f172a] dark:text-white leading-tight">
-                Secure Access
+                Welcome Back
               </h2>
             </div>
 
             <form onSubmit={onLogin} className="space-y-5">
               <div>
                 <label className="block text-[10px] font-black tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 mb-2">
-                  User ID
+                  Email ID or Mobile Number
                 </label>
                 <input
                   className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a0d14] text-slate-900 dark:text-white focus:outline-none focus:border-[#0a3161] focus:ring-1 focus:ring-[#0a3161] dark:focus:border-cyan-500 dark:focus:ring-cyan-500 transition-all text-sm font-bold placeholder:font-normal placeholder:opacity-70 uppercase tracking-widest shadow-inner shadow-slate-100 dark:shadow-none"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Official ID"
+                  value={identity}
+                  onChange={(e) => setIdentity(e.target.value)}
+                  placeholder="Email or Mobile"
                   autoComplete="username"
                 />
               </div>
@@ -142,7 +142,7 @@ export default function Login() {
       </main>
       
       <div className="py-6 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500">
-        Department of Transportation
+        City Bus Transit Service
       </div>
     </div>
   );

@@ -10,7 +10,10 @@ export default function Register() {
   const { theme, toggleTheme } = useTheme();
   const { register } = useAuth();
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [stateLoc, setStateLoc] = useState("");
+  const [district, setDistrict] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +24,8 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const activeUser = await register(name.trim(), username.trim(), password);
+      const activeUser = await register(name.trim(), email.trim(), mobile.trim(), stateLoc.trim(), district.trim(), password);
+      alert(`Registration Successful!\n\nYour auto-generated Username is: ${activeUser.username}\n\nPlease save this username to login in the future.`);
       if (activeUser?.role === "admin") nav("/admin");
       else if (activeUser?.role === "operator") nav("/operator");
       else nav("/");
@@ -32,18 +36,18 @@ export default function Register() {
     }
   }
 
-  const canSubmit = name.trim() && username.trim() && password;
+  const canSubmit = name.trim() && password;
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 min-h-screen">
       <GovHeader
-        lastSyncText="Provision Account"
+        lastSyncText="Create Account"
         backendOk={true}
         onToggleTheme={toggleTheme}
         themeLabel={theme === "dark" ? "night" : "day"}
       />
       <div className="gov-banner border-b border-slate-200 dark:border-slate-800 bg-white/50 backdrop-blur-md">
-        Create your SmartBus authenticated matrix profile.
+        Create your SmartBus account.
       </div>
 
       <motion.main
@@ -54,8 +58,8 @@ export default function Register() {
       >
         <section className="bg-white dark:bg-[#111111] shadow-none rounded-none w-full max-w-md border border-gray-300 dark:border-gray-700 border-t-4 border-t-[#0a3161] overflow-hidden">
           <div className="p-8 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1d24] flex flex-col items-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Provision Profile</h2>
-            <div className="text-gray-500 text-[11px] uppercase tracking-widest font-black">Identity Registration</div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Create Account</h2>
+            <div className="text-gray-500 text-[11px] uppercase tracking-widest font-black">Sign Up</div>
           </div>
 
           <div className="p-8">
@@ -66,24 +70,56 @@ export default function Register() {
                   className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="System alias"
+                  placeholder="Full Name"
                   autoComplete="name"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Username Hardware ID</label>
+                <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
                 <input
                   className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Unique identifier"
-                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email ID"
+                  autoComplete="email"
                 />
               </div>
 
               <div>
-                <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Cryptographic Key</label>
+                <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Mobile Number</label>
+                <input
+                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  placeholder="Mobile Number"
+                  autoComplete="tel"
+                />
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">State</label>
+                  <input
+                    className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
+                    value={stateLoc}
+                    onChange={(e) => setStateLoc(e.target.value)}
+                    placeholder="State"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">District</label>
+                  <input
+                    className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
+                    value={district}
+                    onChange={(e) => setDistrict(e.target.value)}
+                    placeholder="District"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-[600] text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                 <input
                   className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
                   value={password}
@@ -100,14 +136,14 @@ export default function Register() {
                   type="submit" 
                   disabled={!canSubmit || loading}
                 >
-                  {loading ? "Allocating…" : "Provision Engine"}
+                  {loading ? "Registering…" : "Register"}
                 </button>
               </div>
 
               {error && <div className="text-rose-500 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900/50 p-3 rounded-lg text-[13px] font-[700] mt-4 text-center">{error}</div>}
 
               <div className="text-slate-500 text-[13px] text-center pt-2 font-[600]">
-                Identity provisioned? <Link to="/login" className="text-blue-600 hover:underline">Authenticate instead</Link>
+                Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Login here</Link>
               </div>
             </form>
           </div>

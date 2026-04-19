@@ -220,8 +220,8 @@ export default function CommuterSearch({ user, role }) {
           themeLabel={theme === "dark" ? "night" : "day"}
         />
         <div className="bg-[#0a3161] text-white py-1.5 px-4 text-[10px] uppercase tracking-widest font-bold flex justify-between items-center border-b-[3px] border-[#d4af37]">
-          <span>Dept. of Transportation — Civilian Link Active</span>
-          <span>Public Telemetry View</span>
+          <span>City Bus Transit Service</span>
+          <span>Live Bus Tracking</span>
         </div>
 
         <main className="flex-1 w-full max-w-5xl mx-auto flex flex-col items-stretch p-4 sm:p-6 pb-20">
@@ -249,8 +249,8 @@ export default function CommuterSearch({ user, role }) {
         themeLabel={theme === "dark" ? "night" : "day"}
       />
       <div className="bg-[#0a3161] text-white py-1.5 px-4 text-[10px] uppercase tracking-widest font-bold flex justify-between items-center border-b-[3px] border-[#d4af37]">
-        <span>Dept. of Transportation — Civilian Link Active</span>
-        <span>Public Session</span>
+        <span>City Bus Transit Service</span>
+        <span>Public Area</span>
       </div>
 
       <main className="flex-1 p-4 sm:p-6 w-full max-w-5xl mx-auto flex flex-col">
@@ -259,8 +259,8 @@ export default function CommuterSearch({ user, role }) {
            <div className="mb-6 bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-900 px-5 py-4 flex items-start gap-4">
              <i className="fa-solid fa-triangle-exclamation text-rose-600 dark:text-rose-500 mt-1"></i>
              <div>
-               <div className="text-[11px] font-black tracking-widest text-rose-700 dark:text-rose-400 uppercase mb-1">OFFLINE MODE ENABLED</div>
-               <div className="text-[13px] font-bold text-rose-900 dark:text-rose-300">Schedules loaded securely from localized cache. Latent data from {new Date(lastSyncTime).toLocaleString()}.</div>
+               <div className="text-[11px] font-black tracking-widest text-rose-700 dark:text-rose-400 uppercase mb-1">YOU ARE OFFLINE</div>
+               <div className="text-[13px] font-bold text-rose-900 dark:text-rose-300">Schedules are loaded from your device. Showing data from {new Date(lastSyncTime).toLocaleString()}.</div>
              </div>
            </div>
         )}
@@ -270,10 +270,10 @@ export default function CommuterSearch({ user, role }) {
           <div className="bg-slate-50 dark:bg-[#151b27] px-8 py-5 border-b border-slate-300 dark:border-slate-800 flex justify-between items-center">
             <div>
               <h1 className="text-[22px] font-black uppercase tracking-widest text-[#0f172a] dark:text-white m-0 leading-tight">
-                Public Query Terminal
+                Search for a Bus
               </h1>
               <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-[0.2em] font-bold">
-                Civilian Infrastructure Array
+                Find routes, stops, and schedules
               </div>
             </div>
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="State Crest" className="h-[46px] filter grayscale opacity-50 dark:invert" />
@@ -282,7 +282,7 @@ export default function CommuterSearch({ user, role }) {
           <div className="p-8">
             <div className="bg-slate-50 dark:bg-[#151b27] border border-slate-300 dark:border-slate-700 p-5 mb-8 flex flex-col gap-3">
                <h3 className="text-[11px] font-black uppercase tracking-widest text-[#0a3161] dark:text-blue-400 border-b border-slate-300 dark:border-slate-700 pb-2">
-                 Input Identity Parameters
+                 Enter Search Details
                </h3>
                <div className="relative w-full">
                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -302,7 +302,7 @@ export default function CommuterSearch({ user, role }) {
             {query.trim() ? (
               <div className="w-full flex flex-col gap-2">
                 <h3 className="text-[11px] font-black uppercase tracking-widest text-[#0a3161] dark:text-blue-400 border-b border-slate-300 dark:border-slate-700 pb-2 mb-2">
-                 Query Response Array
+                 Search Results
                </h3>
                 {searchResults.length > 0 ? (
                   searchResults.map((item, idx) => (
@@ -325,7 +325,7 @@ export default function CommuterSearch({ user, role }) {
                   ))
                 ) : (
                   <div className="text-center bg-slate-50 dark:bg-[#151b27] border border-slate-300 dark:border-slate-700 p-8 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                    No results found in data matrix for "{query}"
+                    No results found for "{query}"
                   </div>
                 )}
               </div>
@@ -333,7 +333,7 @@ export default function CommuterSearch({ user, role }) {
               <div className="w-full flex flex-col gap-2">
                  <div className="flex items-center gap-4 mb-2">
                    <h3 className="flex-1 text-[11px] font-black uppercase tracking-widest text-[#0a3161] dark:text-blue-400 border-b border-slate-300 dark:border-slate-700 pb-2">
-                     Recent Queries
+                     Recent Searches
                    </h3>
                    <button 
                      onClick={handleNearbySearch}
@@ -341,7 +341,7 @@ export default function CommuterSearch({ user, role }) {
                      className="bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 text-[10px] px-3 py-1.5 uppercase tracking-widest font-bold transition-all flex items-center gap-2"
                    >
                      <i className={`fa-solid fa-location-crosshairs ${isSearchingNearby ? 'animate-spin' : ''}`}></i>
-                     {isSearchingNearby ? "SCANNING..." : "SCAN LOCALITY"}
+                     {isSearchingNearby ? "SEARCHING..." : "FIND NEARBY STOPS"}
                    </button>
                  </div>
                  
@@ -361,7 +361,7 @@ export default function CommuterSearch({ user, role }) {
                      ))
                  ) : (
                     <div className="text-center bg-slate-50 dark:bg-[#151b27] border border-slate-300 dark:border-slate-700 p-8 text-slate-500 text-xs font-bold uppercase tracking-widest">
-                      Local query buffer empty. Initiate global scan above.
+                      No recent searches. Use the search bar above to begin.
                     </div>
                  )}
               </div>
@@ -369,7 +369,7 @@ export default function CommuterSearch({ user, role }) {
             
             <div className="mt-8 text-center border-t border-slate-300 dark:border-slate-800 pt-6">
                <div className="text-[10px] text-slate-500 uppercase tracking-[0.2em] font-bold">
-                 Information System Authorized For Official Transport Telemetry Only
+                 Official Platform for City Bus Tracking
                </div>
             </div>
             

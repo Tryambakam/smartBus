@@ -8,7 +8,8 @@ import {
   Globe,
   ChevronDown,
   Bell,
-  Menu
+  Menu,
+  CalendarClock
 } from "lucide-react";
 import SmartBusLogo from "./SmartBusLogo";
 import { useAuth } from "../contexts/AuthContext";
@@ -30,7 +31,7 @@ export default function GovHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full bg-slate-50/90 dark:bg-[#070b14]/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-blue-900/40 border-t-2 border-t-[#0a3161] dark:border-t-blue-500 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-500" role="banner">
-      <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between relative">
         
         {/* Premium Brand & Menu */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -59,10 +60,18 @@ export default function GovHeader({
             </div>
             <div className="text-[7.5px] font-black tracking-[0.2em] text-[#0a3161]/80 dark:text-cyan-400/80 uppercase mt-0.5 text-center w-full flex items-center justify-center gap-1.5">
               <div className="w-1 h-1 rounded-full bg-[#0a3161] dark:bg-cyan-400 animate-pulse"></div>
-              GLOBAL TELEMETRY NODE
+              Real-Time Tracking
             </div>
           </div>
         </div>
+
+        {/* Navigation Core Features */}
+        <nav className="hidden lg:flex items-center gap-5 xl:gap-8 absolute left-1/2 -translate-x-1/2">
+          <Link to="/timetable" className="group flex flex-col items-center gap-1 text-[#0a3161] hover:text-[#005ea2] dark:text-slate-300 dark:hover:text-cyan-400 transition-colors">
+            <CalendarClock size={18} strokeWidth={2} className="group-hover:-translate-y-0.5 transition-transform opacity-80 group-hover:opacity-100" />
+            <span className="text-[9px] font-black uppercase tracking-widest">Bus Timetable</span>
+          </Link>
+        </nav>
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -137,7 +146,7 @@ export default function GovHeader({
             </>
           ) : (
             <Link 
-              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white px-4 py-1.5 rounded-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all font-black tracking-widest uppercase text-[10px] ml-2" 
+              className="flex items-center gap-2 bg-[#005ea2] hover:bg-[#1a4480] dark:bg-blue-600 dark:hover:bg-blue-500 !text-white px-5 py-2 rounded shadow border border-[#005ea2] dark:border-blue-600 transition-all font-black tracking-widest uppercase text-[11px] ml-2" 
               to="/login"
             >
               <LogIn size={14} strokeWidth={2.5} />
