@@ -3,147 +3,342 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Where is my Bus? | SmartBus Platform</title>
+  <title>Where is my Bus? | Official Portal</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* Governmental Theme */
+    /* Clean, Official Governmental Theme */
     :root {
-      --gov-blue: #0a3161;
-      --gov-dark: #1F2937;
-      --gov-white: #FFFFFF;
-      --gov-bg: #F3F4F6;
-      --gov-green: #10B981;
-      --gov-amber: #F59E0B;
-      --gov-red: #EF4444;
-      --border: #E5E7EB;
+      --gov-blue: #0f172a;
+      --gov-white: #ffffff;
+      --gov-bg: #ffffff;
+      --gov-text: #1e293b;
+      --gov-muted: #64748b;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      --gold: #d4af37;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--gov-bg); color: var(--gov-dark); display: flex; flex-direction: column; min-height: 100vh; overscroll-behavior-y: none; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Inter", sans-serif; }
+    
+    body { 
+      background-color: var(--gov-bg); 
+      color: var(--gov-text); 
+      display: flex; 
+      flex-direction: column; 
+      min-height: 100vh; 
+      /* Elegant grey map pattern - subtle dots to represent a grid/map */
+      background-image: radial-gradient(circle at center, #cbd5e1 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
     
     /* Header */
-    header { background: var(--gov-blue); color: var(--gov-white); border-bottom: 3px solid var(--gov-amber); padding: 12px 16px; display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
-    .header-logo { width: 32px; height: 32px; background: rgba(255,255,255,0.15); color: var(--gov-white); border-radius: 6px; display: flex; justify-content: center; align-items: center; margin-right: 12px; font-size: 16px; border: 1px solid rgba(255,255,255,0.25); }
+    header { 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e8f0; 
+      padding: 12px 24px; 
+      display: flex; 
+      justify-content: space-between;
+      align-items: center; 
+      position: sticky; 
+      top: 0; 
+      z-index: 50; 
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .crest {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      filter: grayscale(100%) opacity(0.85); /* subtle */
+    }
+
+    .header-logo { 
+      width: 36px; 
+      height: 36px; 
+      background: var(--gov-blue);
+      color: var(--gov-white); 
+      border-radius: 8px; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      font-size: 18px; 
+    }
+    
     .header-titles { display: flex; flex-direction: column; }
-    .header-dept { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
-    .header-brand { font-size: 15px; font-weight: 700; color: var(--gov-white); }
+    .header-dept { font-size: 11px; font-weight: 600; color: var(--gov-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-brand { font-size: 18px; font-weight: 700; color: var(--gov-blue); letter-spacing: -0.3px; }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-icon {
+      color: var(--gov-muted);
+      font-size: 18px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .nav-icon:hover { color: var(--gov-blue); }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gov-blue);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 24px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { background: #f1f5f9; }
+    .gold-padlock { color: var(--gold); font-size: 15px; }
     
     /* Main Layout */
-    main { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; }
-    h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px; color: var(--gov-dark); }
+    main { 
+      flex: 1; 
+      width: 100%; 
+      max-width: 640px; 
+      margin: 0 auto; 
+      padding: 64px 24px; 
+      display: flex; 
+      flex-direction: column; 
+    }
     
-    /* Welcome View */
-    #welcome-view { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; animation: fadeIn 0.5s ease; width: 100%; margin-top: 4vh; }
-    .welcome-hero { margin-bottom: 48px; }
-    .welcome-icon { font-size: 64px; color: var(--gov-blue); margin-bottom: 24px; filter: drop-shadow(0 10px 15px rgba(0,122,255,0.2)); }
-    .welcome-hero h1 { font-size: 34px; margin-bottom: 12px; font-weight: 800; letter-spacing: -1px; }
-    .welcome-hero p { font-size: 17px; color: #8E8E93; max-width: 280px; margin: 0 auto; line-height: 1.5; font-weight: 500;}
-    .auth-buttons { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 320px; margin: 0 auto; }
-    .btn-primary { background: var(--gov-blue); color: var(--gov-white); border: none; padding: 16px; border-radius: 0px; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 6px rgba(10, 49, 97, 0.2); width: 100%; }
-    .btn-primary:hover { background: #072448; transform: scale(0.98); box-shadow: 0 4px 10px rgba(10, 49, 97, 0.3); }
-    .btn-secondary { background: var(--gov-white); color: var(--gov-blue); border: 2px solid var(--gov-blue); padding: 16px; border-radius: 0px; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
-    .btn-secondary:hover { background: var(--gov-bg); transform: scale(0.98); }
+    .hero-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
 
-    /* Views */
-    #search-view { display: none; width: 100%; animation: fadeIn 0.3s ease; }
+    h1 { 
+      font-size: 44px; 
+      font-weight: 800; 
+      letter-spacing: -1.2px; 
+      color: var(--gov-blue); 
+      margin-bottom: 12px;
+    }
 
+    .subtitle {
+      font-size: 17px;
+      color: var(--gov-muted);
+      font-weight: 400;
+    }
+    
     /* Search Bar */
-    .search-container { position: relative; margin-bottom: 32px; width: 100%; }
-    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #8E8E93; font-size: 16px; }
-    .search-input { width: 100%; padding: 12px 20px 12px 42px; font-size: 17px; border: none; background: rgba(118, 118, 128, 0.12); border-radius: 10px; outline: none; transition: 0.2s; color: var(--gov-dark); font-weight: 400; }
-    .search-input:focus { background: rgba(118, 118, 128, 0.18); }
-    .search-input::placeholder { color: #8E8E93; }
+    .search-wrapper { margin-bottom: 32px; width: 100%; }
+    .search-container { 
+      position: relative; 
+      width: 100%; 
+      box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+      border-radius: 999px;
+      background: #fff;
+    }
+    .search-icon { 
+      position: absolute; 
+      left: 28px; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      color: var(--gov-blue); 
+      font-size: 20px; 
+    }
+    .search-input { 
+      width: 100%; 
+      padding: 24px 32px 24px 64px; 
+      font-size: 20px; 
+      border: 1px solid #e2e8f0; 
+      background: transparent; 
+      border-radius: 999px; 
+      outline: none; 
+      transition: all 0.3s ease; 
+      color: var(--gov-text); 
+      font-weight: 500; 
+    }
+    .search-input:focus { 
+      border-color: var(--gov-blue);
+      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.05);
+    }
+    .search-input::placeholder { color: #94a3b8; font-weight: 400; }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    .btn-nearby {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gov-blue);
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      padding: 12px 24px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      transition: all 0.2s;
+    }
+    .btn-nearby:hover {
+      border-color: var(--gov-blue);
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+    .btn-nearby i { font-size: 18px; color: var(--gov-blue); }
 
     /* Results */
-    .section-title { font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: -0.08px; margin-bottom: 8px; margin-left: 16px; }
-    .list-container { display: flex; flex-direction: column; background: transparent; gap: 8px; }
-    .card { background: var(--gov-white); border: 1px solid var(--border); border-radius: 6px; padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: background 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .card:last-child { border-bottom: 1px solid var(--border); }
-    .card:hover { border-color: var(--gov-blue); }
-    .card-icon { width: 44px; height: 44px; background: rgba(0, 122, 255, 0.1); color: var(--gov-blue); border-radius: 22px; display: flex; justify-content: center; align-items: center; font-size: 18px; flex-shrink: 0; }
+    .section-title { 
+      font-size: 13px; 
+      font-weight: 700; 
+      color: var(--gov-muted); 
+      text-transform: uppercase; 
+      letter-spacing: 1.2px; 
+      margin-bottom: 20px; 
+      margin-left: 8px; 
+    }
+    .list-container { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 16px; 
+    }
+    .card { 
+      background: #fff; 
+      border: none; 
+      border-radius: 16px; 
+      padding: 24px; 
+      display: flex; 
+      align-items: center; 
+      gap: 20px; 
+      cursor: pointer; 
+      transition: transform 0.2s, box-shadow 0.2s; 
+      box-shadow: var(--card-shadow); 
+    }
+    .card:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    }
+    .card-icon { 
+      width: 48px; 
+      height: 48px; 
+      background: #f1f5f9; 
+      color: var(--gov-blue); 
+      border-radius: 50%; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      font-size: 20px; 
+      flex-shrink: 0; 
+    }
     .card-info { flex: 1; display: flex; flex-direction: column; }
-    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 2px; }
-    .card-subtitle { font-size: 15px; color: #8E8E93; font-weight: 400; }
-    .card-arrow { color: #C6C6C8; font-size: 14px; }
+    .card-title { font-size: 18px; font-weight: 600; color: var(--gov-text); margin-bottom: 6px; }
+    .card-subtitle { font-size: 15px; color: var(--gov-muted); font-weight: 400; }
+    .card-arrow { color: #cbd5e1; font-size: 18px; margin-left: 12px; transition: transform 0.2s; }
+    .card:hover .card-arrow { transform: translateX(6px); color: var(--gov-blue); }
 
-    /* Tracking View */
+    /* Tracking View (simplified for demo) */
     #tracking-view { display: none; width: 100%; animation: fadeIn 0.3s ease; }
-    .back-btn { background: none; border: none; font-size: 17px; font-weight: 400; color: var(--gov-blue); display: flex; align-items: center; gap: 6px; cursor: pointer; margin-bottom: 24px; }
-    .back-btn:hover { opacity: 0.7; }
+    .back-btn { background: none; border: none; font-size: 16px; font-weight: 500; color: var(--gov-muted); display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 32px; transition: color 0.2s; }
+    .back-btn:hover { color: var(--gov-blue); }
     
-    .hero-card { background: var(--gov-white); border-radius: 14px; padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .hero-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-    .hero-labels { display: flex; flex-direction: column; gap: 6px; }
-    .hero-badge { display: inline-flex; align-items: center; padding: 4px 8px; background: var(--gov-bg); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .hero-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #6B7280; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .status-dot.green { background: var(--gov-green); box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2); }
-    .status-dot.amber { background: var(--gov-amber); box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2); }
-    .hero-title { font-size: 28px; font-weight: 700; margin-top: 8px; letter-spacing: 0.36px; }
-    .hero-share { width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(0, 122, 255, 0.1); color: var(--gov-blue); display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; transition: 0.2s; }
-    .hero-share:hover { background: rgba(0, 122, 255, 0.2); }
+    .hero-card { background: #fff; border-radius: 20px; padding: 32px; margin-bottom: 32px; box-shadow: var(--card-shadow); }
+    .hero-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+    .hero-labels { display: flex; flex-direction: column; gap: 10px; }
+    .hero-badge { display: inline-flex; align-items: center; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--gov-blue); text-transform: uppercase; letter-spacing: 0.5px; }
+    .hero-status { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: var(--gov-muted); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .status-dot.green { background: #10B981; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+    .status-dot.amber { background: #F59E0B; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); }
+    .hero-title { font-size: 28px; font-weight: 700; margin-top: 6px; letter-spacing: -0.5px; color: var(--gov-blue); }
     
-    .eta-box { text-align: center; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 20px; }
-    .eta-label { font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: -0.08px; margin-bottom: 8px; }
-    .eta-stop { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-    .eta-time { font-size: 17px; font-weight: 600; color: var(--gov-blue); display: flex; justify-content: center; align-items: baseline; gap: 6px; }
-    .eta-time span { font-size: 48px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+    .eta-box { text-align: center; padding: 32px 0; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; margin-bottom: 32px; }
+    .eta-label { font-size: 14px; font-weight: 700; color: var(--gov-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+    .eta-stop { font-size: 24px; font-weight: 600; margin-bottom: 16px; color: var(--gov-text); }
+    .eta-time { font-size: 18px; font-weight: 500; color: var(--gov-muted); display: flex; justify-content: center; align-items: baseline; gap: 10px; }
+    .eta-time span { font-size: 56px; font-weight: 800; letter-spacing: -2px; color: var(--gov-blue); line-height: 1; }
     
     .progress-container { width: 100%; }
-    .progress-labels { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #8E8E93; text-transform: uppercase; margin-bottom: 8px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: #E5E5EA; border-radius: 4px; overflow: hidden; position: relative; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--gov-muted); text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px; }
+    .progress-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; position: relative; }
     .progress-bar-fill { height: 100%; background: var(--gov-blue); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
 
-    /* Timeline Table */
-    .timeline-card { background: var(--gov-white); border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .table-container { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { padding: 12px 16px; font-size: 13px; font-weight: 600; color: #8E8E93; border-bottom: 1px solid var(--border); background: var(--gov-white); }
-    td { padding: 16px; font-size: 15px; font-weight: 400; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    .row-past { opacity: 0.5; }
-    .row-current { background: rgba(0, 122, 255, 0.05); }
-    .row-current td:first-child { border-left: 3px solid var(--gov-blue); padding-left: 13px; font-weight: 600; }
-    .alarm-btn { background: none; border: none; color: var(--gov-blue); cursor: pointer; padding: 4px; border-radius: 50%; transition: 0.2s; font-size: 16px; }
-    .alarm-btn:hover { opacity: 0.7; }
-    .alarm-btn.active { color: var(--gov-amber); }
-
     /* Footer */
-    footer { text-align: center; padding: 24px 16px; font-size: 13px; font-weight: 400; color: #8E8E93; margin-top: auto; }
+    footer { 
+      text-align: center; 
+      padding: 40px 24px; 
+      font-size: 13px; 
+      font-weight: 500; 
+      color: #94a3b8; 
+      margin-top: auto; 
+    }
     
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+      h1 { font-size: 36px; }
+      .search-input { padding: 20px 24px 20px 52px; font-size: 18px; }
+      header { padding: 12px 16px; }
+      main { padding: 40px 16px; }
+      .header-titles { display: none; } /* Simplify header on tiny screens */
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="header-logo">
-      <i class="fa-solid fa-shield-halved"></i>
+    <div class="header-left">
+      <!-- Indian State Crest -->
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" alt="State Crest" class="crest">
+      <div class="header-logo">
+        <i class="fa-solid fa-bus"></i>
+      </div>
+      <div class="header-titles">
+        <span class="header-dept">Official Public Transport Portal</span>
+        <span class="header-brand">smartBus</span>
+      </div>
     </div>
-    <div class="header-titles">
-      <span class="header-dept">Department of Transportation</span>
-      <span class="header-brand">smartBus Tracker</span>
+    <div class="header-right">
+      <i class="fa-solid fa-earth-americas nav-icon" title="Language"></i>
+      <i class="fa-solid fa-moon nav-icon" title="Theme"></i>
+      <a href="#" class="logout-btn">
+        <i class="fa-solid fa-lock gold-padlock"></i>
+        Logout
+      </a>
     </div>
   </header>
 
   <main>
-    <div id="welcome-view">
-      <div class="welcome-hero">
-        <i class="fa-solid fa-bus welcome-icon"></i>
-        <h1>Welcome</h1>
-        <p>Your minimal, commuter-friendly transit companion.</p>
-      </div>
-      <div class="auth-buttons">
-        <button class="btn-primary" onclick="proceedToApp()">Login</button>
-        <button class="btn-secondary" onclick="proceedToApp()">Create Account</button>
-      </div>
-    </div>
-
     <div id="search-view">
-      <h1>Where is my bus?</h1>
-      <div class="search-container">
-        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="bus-search" class="search-input" placeholder="Search by bus number, route name, or stop..." autocomplete="off">
+      <div class="hero-section">
+        <h1>Where is my bus?</h1>
+        <p class="subtitle">Secure live tracking for officially validated routes.</p>
+      </div>
+
+      <div class="search-wrapper">
+        <div class="search-container">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="bus-search" class="search-input" placeholder="Search route, bus number, or stop..." autocomplete="off">
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-nearby">
+          <i class="fa-solid fa-location-crosshairs"></i>
+          Find Nearby Bus
+        </button>
       </div>
       
       <div class="section-title" id="results-title">Recent Tracking</div>
@@ -153,7 +348,7 @@
     </div>
 
     <div id="tracking-view">
-      <button class="back-btn" onclick="showSearch()"><i class="fa-solid fa-arrow-left"></i> Back to Search</button>
+      <button class="back-btn" onclick="showSearch()"><i class="fa-solid fa-arrow-left"></i> Back to search</button>
       
       <div class="hero-card">
         <div class="hero-header">
@@ -162,7 +357,6 @@
             <div class="hero-status"><div class="status-dot green" id="tv-dot"></div><span id="tv-status">On time</span></div>
             <div class="hero-title" id="tv-title">Route Name</div>
           </div>
-          <button class="hero-share" onclick="shareLocation()"><i class="fa-regular fa-share-from-square"></i></button>
         </div>
         
         <div class="eta-box">
@@ -172,60 +366,37 @@
         </div>
 
         <div class="progress-container">
-          <div class="progress-labels"><span>Origin</span><span style="display:flex;align-items:center;gap:4px;"><i class="fa-solid fa-location-arrow"></i><span id="tv-speed">42 km/h</span></span><span>Terminal</span></div>
+          <div class="progress-labels">
+            <span>Origin</span>
+            <span style="display:flex;align-items:center;gap:6px;">
+              <i class="fa-solid fa-gauge-high"></i>
+              <span id="tv-speed">42 km/h</span>
+            </span>
+            <span>Terminal</span>
+          </div>
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="tv-progress"></div></div>
-        </div>
-      </div>
-
-      <div class="timeline-card">
-        <div class="table-container">
-          <table id="timeline-table">
-            <thead>
-              <tr>
-                <th>Stop Location</th>
-                <th>Scheduled</th>
-                <th>Estimated</th>
-                <th style="text-align:center;"><i class="fa-regular fa-bell"></i></th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Injected via JS -->
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   </main>
 
   <footer>
-    Live tracking accuracy may vary based on network. For informational purposes only.
+    <p>&copy; 2026 Department of Transportation. Secure, official portal.</p>
   </footer>
 
   <script>
-    // Offline Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('SW Registered!', reg);
-        }).catch(err => console.log('SW Registration Failed', err));
-      });
-    }
-
-    // Mock Data Matrix
+    // Mock Data Matrix (Reused logic)
     const mockRoutes = [
       { id: '1', name: 'Chandigarh to Ludhiana', busId: 'PB-01-1001', stops: ['Sector 43 ISBT', 'Kharar', 'Morinda', 'Samrala', 'Ludhiana ISBT'] },
       { id: '2', name: 'Delhi to Patiala', busId: 'DL-11-2041', stops: ['Kashmere Gate ISBT', 'Karnal', 'Ambala', 'Rajpura', 'Patiala Bus Stand'] },
       { id: '3', name: 'Amritsar to Jalandhar', busId: 'PB-02-5432', stops: ['Amritsar ISBT', 'Beas', 'Kartarpur', 'Jalandhar City'] },
-      { id: '4', name: 'Shimla to Chandigarh', busId: 'HP-63-9999', stops: ['Shimla ISBT', 'Solan', 'Dharampur', 'Parwanoo', 'Sector 43 ISBT'] },
-      { id: '5', name: 'Mohali City Loop', busId: 'PB-65-0001', stops: ['Phase 8', 'Phase 6', 'Phase 3B2', 'Sector 70', 'Phase 8'] }
+      { id: '4', name: 'Shimla to Chandigarh', busId: 'HP-63-9999', stops: ['Shimla ISBT', 'Solan', 'Dharampur', 'Parwanoo', 'Sector 43 ISBT'] }
     ];
 
     let currentSimulationInterval = null;
     let activeRouteParams = null;
     let globalStopIndex = 0;
 
-    // DOM Elements
-    const welcomeView = document.getElementById('welcome-view');
     const searchView = document.getElementById('search-view');
     const trackingView = document.getElementById('tracking-view');
     const searchInput = document.getElementById('bus-search');
@@ -252,12 +423,12 @@
         resultsTitle.innerText = "Recent Tracking";
         matches = mockRoutes.slice(0,3);
       } else {
-        resultsTitle.innerText = "Results";
+        resultsTitle.innerText = "Search Results";
         matches = mockRoutes.filter(r => fuzzyMatch(r.name, query) || fuzzyMatch(r.busId, query) || r.stops.some(st => fuzzyMatch(st, query)));
       }
 
       if(matches.length === 0) {
-        resultsList.innerHTML = '<div style="text-align:center;padding:24px;color:#9CA3AF;font-size:14px;">No results found.</div>';
+        resultsList.innerHTML = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:15px;">No official routes found.</div>';
         return;
       }
 
@@ -270,7 +441,7 @@
             <span class="card-title">${m.name}</span>
             <span class="card-subtitle">Bus ${m.busId}</span>
           </div>
-          <i class="fa-solid fa-chevron-right card-arrow"></i>
+          <i class="fa-solid fa-arrow-right card-arrow"></i>
         `;
         div.onclick = () => launchTracking(m);
         resultsList.appendChild(div);
@@ -293,12 +464,11 @@
       renderTrackingFrame();
       if(currentSimulationInterval) clearInterval(currentSimulationInterval);
       
-      // Simulate real-time updates exactly every 10 seconds requirement
       currentSimulationInterval = setInterval(() => {
         globalStopIndex++;
         if(globalStopIndex >= route.stops.length) globalStopIndex = 0; // loop
         renderTrackingFrame();
-      }, 10000); 
+      }, 5000); 
     }
 
     function renderTrackingFrame() {
@@ -327,58 +497,11 @@
 
       const etaContainer = document.getElementById('tv-eta-container');
       if(isTerminal) {
-        etaContainer.innerHTML = 'Terminal <span style="font-size:32px;">Reached</span>';
+        etaContainer.innerHTML = 'Terminal <span style="font-size:40px;">Reached</span>';
       } else {
         const randEta = Math.floor(Math.random()*4)+2;
         etaContainer.innerHTML = `Arriving in <span id="tv-eta">${randEta}</span> min`;
       }
-
-      // Render Table Elements
-      const tbody = document.querySelector('#timeline-table tbody');
-      tbody.innerHTML = '';
-      
-      stops.forEach((stop, idx) => {
-        const isPast = idx < globalStopIndex;
-        const isCurrent = idx === globalStopIndex;
-        
-        const tr = document.createElement('tr');
-        if(isPast) tr.className = 'row-past';
-        if(isCurrent) tr.className = 'row-current';
-        
-        let estHtml = ``;
-        if(isPast) estHtml = `<span style="color:#10B981;font-weight:700;">Arrived</span>`;
-        else if(isCurrent) estHtml = `<span style="color:#1E3A8A;font-weight:700;">Arriving Now</span>`;
-        else estHtml = `~${idx * 15}m`;
-
-        const sched = `12:${(idx * 15).toString().padStart(2, '0')} PM`;
-
-        tr.innerHTML = `
-          <td>${isCurrent ? '<i class="fa-solid fa-bus" style="color:var(--gov-blue);margin-right:8px;"></i>' : ''}${stop}</td>
-          <td>${sched}</td>
-          <td>${estHtml}</td>
-          <td style="text-align:center;"><button class="alarm-btn" onclick="toggleAlarm(this)" title="Set alarm"><i class="fa-solid fa-bell"></i></button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function toggleAlarm(btn) {
-      if(btn.classList.contains('active')) {
-        btn.classList.remove('active');
-        alert("Station alarm deactivated.");
-      } else {
-        btn.classList.add('active');
-        if(Notification.permission !== "granted") {
-           Notification.requestPermission();
-        }
-        alert("Platform alarm activated via Service Worker. You will be notified 2 stops prior.");
-      }
-    }
-
-    function proceedToApp() {
-      welcomeView.style.display = 'none';
-      searchView.style.display = 'block';
-      renderList("");
     }
 
     function showSearch() {
@@ -387,15 +510,12 @@
       searchView.style.display = 'block';
     }
 
-    function shareLocation() {
-      if(navigator.share) {
-        navigator.share({ title: 'SmartBus', text: 'Tracking Government Bus.', url: window.location.href}).catch(()=>{});
-      } else {
-        alert("Location status locked to clipboard.");
-      }
-    }
-
-    // Init deferred until login
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      // By default open the search view
+      searchView.style.display = 'block';
+      renderList("");
+    });
   </script>
 </body>
 </html>

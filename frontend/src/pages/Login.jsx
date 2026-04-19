@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import GovHeader from "../components/GovHeader";
 import { useAuth } from "../contexts/AuthContext";
 import useTheme from "../hooks/useTheme";
-import SmartBusLogo from "../components/SmartBusLogo";
 
 export default function Login() {
   const nav = useNavigate();
@@ -55,119 +54,159 @@ export default function Login() {
     setPassword(p);
   }
 
-  const handleOfflineDemo = (sandboxRole) => {
-    // Fabricate a Base64-encoded Mock JWT payload mimicking the backend generator
-    const mockPayload = { userId: `mock-${Math.floor(Math.random() * 999)}`, role: sandboxRole, exp: Date.now() + 86400000 };
-    const fakeJWT = `mockHeader.${btoa(JSON.stringify(mockPayload))}.mockSignature`;
-    
-    // Bypass strict httpOnly browser rules using explicit localStorage targeting
-    localStorage.setItem("mock_jwt_token", fakeJWT);
-
-    // Hard-reload the window forcing AuthContext to re-evaluate against /api/auth/me interceptor natively
-    if (sandboxRole === "admin") window.location.href = "/admin";
-    else if (sandboxRole === "operator") window.location.href = "/operator";
-    else window.location.href = "/dashboard";
-  };
-
   return (
-    <div className="gov-shell bg-slate-50 dark:bg-slate-900 min-h-screen">
+    <div className="gov-shell min-h-screen flex flex-col bg-gradient-to-br from-[#041124] via-[#09224f] to-[#010914] relative">
       <GovHeader
-        lastSyncText="Secure Access"
+        lastSyncText="Secure Auth Node"
         backendOk={true}
         onToggleTheme={toggleTheme}
         themeLabel={theme === "dark" ? "night" : "day"}
       />
-      <div className="gov-banner border-b border-slate-200 dark:border-slate-800 bg-white/50 backdrop-blur-md">
-        Sign in to your SmartBus role-based account.
-      </div>
+      
+      {/* Dynamic Background subtle overlay */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none mix-blend-overlay"></div>
 
       <motion.main
-        className="flex items-center justify-center p-6 mt-1"
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="flex-1 flex items-center justify-center p-4 sm:p-8 z-10"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <section className="bg-white dark:bg-[#111111] shadow-none rounded-none w-full max-w-md border border-gray-300 dark:border-gray-700 border-t-4 border-t-[#0a3161] overflow-hidden">
-          <div className="p-8 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-[#1a1d24] flex flex-col items-center">
-            <SmartBusLogo className="w-12 h-12 text-[#0a3161] dark:text-blue-400 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Welcome Back</h2>
-            <div className="text-gray-500 text-[11px] uppercase tracking-widest font-black">Authentication Engine</div>
-          </div>
-
-          <div className="p-8">
-            <form onSubmit={onLogin} className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Username</label>
-                <input
-                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter assigned role handle"
-                  autoComplete="username"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Password</label>
-                <input
-                  className="w-full px-4 py-3 rounded-none border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111111] text-gray-900 dark:text-white focus:outline-none focus:border-[#0a3161] dark:focus:border-blue-400 transition-colors"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  type="password"
-                  autoComplete="current-password"
-                />
-              </div>
-
-              <button 
-                className="w-full bg-[#0a3161] hover:bg-[#072448] border border-[#0a3161] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-none transition-colors mt-6 uppercase tracking-wider text-sm" 
-                type="submit" 
-                disabled={!canSubmit || loading}
-              >
-                {loading ? "Authenticating Payload…" : "Secure Sign In"}
-              </button>
-
-              {error && <div className="text-rose-500 bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-900/50 p-3 rounded-lg text-sm font-bold mt-4 text-center">{error}</div>}
+        <div 
+          className="w-full max-w-5xl flex flex-col md:flex-row rounded-xl overflow-hidden shadow-[0_25px_60px_-10px_rgba(0,0,0,0.8)] border border-white/10"
+          style={{
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            backgroundColor: "rgba(10, 15, 30, 0.4)"
+          }}
+        >
+          {/* Main Enclosure (Brushed Aluminum & Glass) */}
+          <section 
+            className="flex-1 p-10 md:p-14 relative flex flex-col justify-center items-center"
+            style={{
+              background: theme === 'dark'
+                ? "linear-gradient(135deg, rgba(30,41,59,0.92) 0%, rgba(15,23,42,0.98) 100%)"
+                : "linear-gradient(135deg, rgba(248,250,252,0.95) 0%, rgba(226,232,240,0.98) 100%)",
+              boxShadow: "inset 0 1px 1px rgba(255,255,255,0.2), inset 0 0 20px rgba(0,0,0,0.05)"
+            }}
+          >
+            {/* Brushed texture overlay */}
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] opacity-[0.03] dark:opacity-10 pointer-events-none"></div>
+            
+            <div className="w-full max-w-[340px] flex flex-col items-center relative z-10">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
+                alt="Government Crest" 
+                className={`h-24 mb-6 transition-all duration-300 ${theme === 'dark' ? 'filter brightness-0 invert opacity-90 drop-shadow-md' : 'opacity-90 drop-shadow-sm'}`}
+              />
               
-              <div className="text-slate-500 text-sm text-center pt-3 font-semibold">
-                New user? <Link to="/register" className="text-blue-600 hover:underline">Provision account</Link>
-              </div>
-            </form>
-          </div>
+              <h2 className="text-[26px] font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight text-center">
+                Secure Access Portal
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400 text-[14px] text-center mb-8 font-medium px-2 leading-relaxed">
+                Sign in to your authorized role-based account
+              </p>
 
-          <div className="bg-gray-50 dark:bg-[#1a1d24] p-6 border-t border-gray-300 dark:border-gray-700">
-            <div className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest text-center mb-4">Development Test Credentials</div>
-            <div className="flex flex-col gap-2.5">
-              <button
-                type="button"
-                className="w-full flex justify-between items-center py-3 px-5 bg-white dark:bg-[#111111] text-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-none transition-colors"
-                onClick={() => loadDemo("admin", "pass")}
-              >
-                <span>Admin Level</span>
-                <span className="text-[11px] text-gray-500 font-mono tracking-tight bg-gray-100 dark:bg-gray-800 px-2 py-1 border border-gray-200 dark:border-gray-700">admin/pass</span>
-              </button>
-              <button
-                type="button"
-                className="w-full flex justify-between items-center py-3 px-5 bg-white dark:bg-[#111111] text-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-none transition-colors"
-                onClick={() => loadDemo("bus101", "pass")}
-              >
-                <span>Operator Matrix</span>
-                <span className="text-[11px] text-gray-500 font-mono tracking-tight bg-gray-100 dark:bg-gray-800 px-2 py-1 border border-gray-200 dark:border-gray-700">bus101/pass</span>
-              </button>
-              <button
-                type="button"
-                className="w-full flex justify-between items-center py-3 px-5 bg-white dark:bg-[#111111] text-gray-800 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-none transition-colors"
-                onClick={() => loadDemo("user", "pass")}
-              >
-                <span>Basic Commuter</span>
-                <span className="text-[11px] text-gray-500 font-mono tracking-tight bg-gray-100 dark:bg-gray-800 px-2 py-1 border border-gray-200 dark:border-gray-700">user/pass</span>
-              </button>
+              <form onSubmit={onLogin} className="space-y-6 w-full">
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-700 dark:text-slate-400 mb-2 uppercase tracking-widest pl-1">
+                    User ID
+                  </label>
+                  <input
+                    className="w-full px-4 py-3.5 rounded border border-slate-300 dark:border-white/10 bg-white/70 dark:bg-[#0b1324]/60 text-slate-900 dark:text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-[#0a3161] focus:border-[#0a3161] dark:focus:ring-blue-500/50 dark:focus:border-blue-500 transition-all text-[15px] font-medium backdrop-blur-sm"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter official credentials"
+                    autoComplete="username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-700 dark:text-slate-400 mb-2 uppercase tracking-widest pl-1">
+                    Password
+                  </label>
+                  <input
+                    className="w-full px-4 py-3.5 rounded border border-slate-300 dark:border-white/10 bg-white/70 dark:bg-[#0b1324]/60 text-slate-900 dark:text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-[#0a3161] focus:border-[#0a3161] dark:focus:ring-blue-500/50 dark:focus:border-blue-500 transition-all text-[15px] font-medium backdrop-blur-sm tracking-widest placeholder:tracking-normal"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    type="password"
+                    autoComplete="current-password"
+                  />
+                </div>
+
+                <button 
+                  className="w-full bg-[#0a3161] hover:bg-[#08264a] text-white font-bold py-4 rounded transition-all mt-4 shadow-[0_4px_14px_0_rgba(10,49,97,0.39)] hover:shadow-[0_6px_20px_rgba(10,49,97,0.23)] active:scale-[0.98] uppercase tracking-[0.15em] text-[13px] disabled:opacity-60 disabled:cursor-not-allowed border border-white/5" 
+                  type="submit" 
+                  disabled={!canSubmit || loading}
+                >
+                  {loading ? "Authenticating..." : "Secure Sign In"}
+                </button>
+
+                {error && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 p-3 rounded text-[13px] font-semibold mt-4 text-center">
+                    {error}
+                  </motion.div>
+                )}
+              </form>
+
+              {/* Dev Test Credentials */}
+              <div className="mt-8 pt-6 border-t border-slate-300 dark:border-slate-700/50 w-full">
+                <div className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center mb-3">
+                  Development Shortcuts
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <button onClick={() => loadDemo("admin", "pass")} type="button" className="text-[11px] px-3 py-1.5 bg-slate-200 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded font-mono text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition">admin</button>
+                  <button onClick={() => loadDemo("bus101", "pass")} type="button" className="text-[11px] px-3 py-1.5 bg-slate-200 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded font-mono text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 transition">operator</button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Security Notice Panel */}
+          <aside className="hidden md:flex md:w-[45%] bg-[#020b18]/90 p-12 flex-col border-l border-white/5 relative overflow-hidden backdrop-blur-xl">
+            {/* Decorative background crest/shield watermark */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none">
+              <svg width="400" height="400" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 21c-4.14 0-7.5-3.36-7.5-7.5S7.86 7 12 7s7.5 3.36 7.5 7.5S16.14 22 12 22zm0-13c-3.03 0-5.5 2.47-5.5 5.5S8.97 20 12 20s5.5-2.47 5.5-5.5S15.03 9 12 9z"/>
+              </svg>
+            </div>
+
+            <div className="flex items-center gap-3 text-rose-500 font-bold tracking-[0.2em] text-xs mb-8 uppercase relative z-10 border-b border-rose-500/20 pb-4">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+              Security Notice
             </div>
             
+            <div className="space-y-6 relative z-10">
+              <p className="text-[13px] leading-relaxed font-medium text-slate-300">
+                You are accessing a Government Information System (IS) that is provided for officially authorized use only.
+              </p>
+              <p className="text-[13px] leading-relaxed font-medium text-slate-300">
+                Information on this system is subject to interception, recording, reading, copying, and auditing by authorized personnel.
+              </p>
+              <p className="text-[13px] leading-relaxed font-medium text-slate-300">
+                Unauthorized or improper use of this system may result in disciplinary action and civil and criminal penalties. By continuing to use this system you indicate your awareness of and consent to these terms and conditions.
+              </p>
+            </div>
 
-          </div>
-        </section>
+            <div className="mt-auto pt-10 relative z-10 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest mx-auto mb-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                Secure Connection
+              </div>
+              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block">
+                Official Use Only
+              </div>
+            </div>
+          </aside>
+        </div>
       </motion.main>
+      
+      {/* Global Footer */}
+      <div className="mt-auto pb-4 text-center text-[10px] font-bold tracking-widest uppercase text-white/30 z-10 w-full relative">
+        Department of Transportation &bull; smartBus Platform
+      </div>
     </div>
   );
 }
