@@ -39,6 +39,7 @@ export default function OperatorDemo() {
       const res = await fetch(`${API_BASE}/api/gps/update`, {
         method: "POST",
         headers: authHeaders({ "Content-Type": "application/json" }),
+        credentials: "include",
         body: JSON.stringify({
           busId: busId.trim(),
           routeId: routeId.trim(),

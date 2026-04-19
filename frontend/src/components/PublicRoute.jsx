@@ -9,7 +9,8 @@ export default function PublicRoute({ children, restricted = false }) {
   }
 
   if (user && restricted) {
-    // Rely exclusively on the UnifiedDashboard routing logic
+    if (user.role === 'admin') return <Navigate to="/admin" replace />;
+    if (user.role === 'operator') return <Navigate to="/operator" replace />;
     return <Navigate to="/dashboard" replace />;
   }
 
