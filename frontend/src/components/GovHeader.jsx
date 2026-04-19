@@ -46,13 +46,19 @@ export default function GovHeader({
           <div className={`w-11 h-11 flex items-center justify-center ${!isAuthed ? '-ml-1' : ''}`}>
             <SmartBusLogo className="w-12 h-12 drop-shadow-md transition-transform hover:scale-105 duration-300" />
           </div>
-          <div className="flex flex-col">
-            <div className="text-[10px] font-bold tracking-widest text-slate-500 dark:text-slate-400 uppercase leading-none mb-1">
-              {t("app.dept")}
+          <div className="flex flex-col justify-center select-none pt-1">
+            <div className="relative flex items-center text-[#06335e] dark:text-white leading-none">
+              <span className="font-black text-[27px] tracking-tight">smart</span>
+              <div className="relative">
+                <span className="font-medium text-[27px] tracking-tight ml-[1px] opacity-95">Bus</span>
+                <svg className="absolute -left-[12px] bottom-[3px] w-6 h-3.5" viewBox="0 0 24 16" fill="none">
+                  <path d="M 0,0 C 8,14 16,14 20,4" stroke="#00b4d8" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="21" cy="2.5" r="2.5" fill="#00b4d8" />
+                </svg>
+              </div>
             </div>
-            <div className="text-xl font-extrabold tracking-tight leading-none bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-2">
-              <span>{t("app.name")}</span>
-              <span className="text-sm font-medium text-slate-400 dark:text-slate-500 tracking-normal hidden sm:inline-block">— {t("app.tagline")}</span>
+            <div className="text-[8px] font-bold tracking-[0.15em] text-slate-500/90 dark:text-slate-400/80 uppercase mt-0.5 text-center w-full">
+              Real-Time Public Transport Tracking
             </div>
           </div>
         </div>
