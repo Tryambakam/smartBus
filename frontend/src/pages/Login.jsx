@@ -68,7 +68,7 @@ export default function Login() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="w-full max-w-[380px]"
         >
-          <div className="bg-white dark:bg-[#0f141e] border-t-8 border-t-[#0a3161] border border-slate-300 dark:border-slate-800 shadow-[0_4px_24px_rgba(0,0,0,0.05)] p-8 sm:p-10 transition-colors">
+          <div className="bg-white dark:bg-[#0f141e] rounded-xl border-t-4 border-t-[#0a3161] border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-black/50 p-8 sm:p-10 transition-colors">
             <div className="flex flex-col items-center mb-8">
               <img 
                 src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
@@ -86,7 +86,7 @@ export default function Login() {
                   User ID
                 </label>
                 <input
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0a0d14] text-slate-900 dark:text-white focus:outline-none focus:border-[#0a3161] focus:ring-1 focus:ring-[#0a3161] dark:focus:ring-blue-500 transition-all text-sm font-bold placeholder:font-normal placeholder:opacity-70 uppercase tracking-widest"
+                  className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a0d14] text-slate-900 dark:text-white focus:outline-none focus:border-[#0a3161] focus:ring-1 focus:ring-[#0a3161] dark:focus:border-cyan-500 dark:focus:ring-cyan-500 transition-all text-sm font-bold placeholder:font-normal placeholder:opacity-70 uppercase tracking-widest shadow-inner shadow-slate-100 dark:shadow-none"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Official ID"
@@ -99,7 +99,7 @@ export default function Login() {
                   Password
                 </label>
                 <input
-                  className="w-full px-4 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#0a0d14] text-slate-900 dark:text-white focus:outline-none focus:border-[#0a3161] focus:ring-1 focus:ring-[#0a3161] dark:focus:ring-blue-500 transition-all text-sm font-mono tracking-[0.2em] placeholder:tracking-normal placeholder:font-sans"
+                  className="w-full px-4 py-3 rounded-md border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-[#0a0d14] text-slate-900 dark:text-white focus:outline-none focus:border-[#0a3161] focus:ring-1 focus:ring-[#0a3161] dark:focus:border-cyan-500 dark:focus:ring-cyan-500 transition-all text-sm font-mono tracking-[0.2em] placeholder:tracking-normal placeholder:font-sans shadow-inner shadow-slate-100 dark:shadow-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -115,11 +115,16 @@ export default function Login() {
               )}
 
               <button 
-                className="w-full bg-[#0a3161] hover:bg-[#08264a] text-white font-bold py-3.5 transition-colors mt-4 text-[12px] uppercase tracking-[0.15em] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),_0_3px_5px_rgba(0,0,0,0.2)] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                className="w-full bg-[#0a3161] hover:bg-[#11468F] dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white font-bold py-4 rounded-md transition-colors mt-4 text-[13px] uppercase tracking-[0.15em] shadow-lg shadow-blue-900/20 dark:shadow-cyan-900/30 border border-transparent disabled:opacity-50 disabled:cursor-not-allowed group flex justify-center items-center gap-2" 
                 type="submit" 
                 disabled={!canSubmit || loading}
               >
-                {loading ? "Authenticating..." : "Sign In"}
+                {loading ? "Authenticating..." : (
+                  <>
+                    <span>Sign In</span>
+                    <i className="fa-solid fa-arrow-right text-blue-300 dark:text-white group-hover:translate-x-1 transition-transform mb-[1px]"></i>
+                  </>
+                )}
               </button>
             </form>
 
@@ -127,9 +132,9 @@ export default function Login() {
               <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center mb-3">
                 Demo Accounts
               </div>
-              <div className="flex gap-2 justify-center">
-                <button onClick={() => loadDemo("admin", "pass")} type="button" className="text-[10px] uppercase font-bold tracking-widest px-4 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">admin</button>
-                <button onClick={() => loadDemo("bus101", "pass")} type="button" className="text-[10px] uppercase font-bold tracking-widest px-4 py-2 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">bus101</button>
+              <div className="flex gap-3 justify-center">
+                <button onClick={() => loadDemo("admin", "pass")} type="button" className="text-[10px] uppercase font-bold tracking-widest px-5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all border border-slate-200 dark:border-slate-700">admin</button>
+                <button onClick={() => loadDemo("bus101", "pass")} type="button" className="text-[10px] uppercase font-bold tracking-widest px-5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all border border-slate-200 dark:border-slate-700">bus101</button>
               </div>
             </div>
           </div>

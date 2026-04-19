@@ -29,7 +29,7 @@ export default function GovHeader({
   const setLang = (lng) => i18n.changeLanguage(lng);
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#111111] border-b border-gray-300 dark:border-gray-800 transition-colors duration-500" role="banner">
+    <header className="sticky top-0 z-50 w-full bg-slate-50/90 dark:bg-[#070b14]/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-blue-900/40 border-t-2 border-t-[#0a3161] dark:border-t-blue-500 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-500" role="banner">
       <div className="max-w-[1600px] mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* Premium Brand & Menu */}
@@ -53,12 +53,13 @@ export default function GovHeader({
                 <span className="font-medium text-[27px] tracking-tight ml-[1px] opacity-95">Bus</span>
                 <svg className="absolute -left-[12px] bottom-[3px] w-6 h-3.5" viewBox="0 0 24 16" fill="none">
                   <path d="M 0,0 C 8,14 16,14 20,4" stroke="#00b4d8" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="21" cy="2.5" r="2.5" fill="#00b4d8" />
+                  <circle cx="21" cy="2.5" r="2.5" fill="#00b4d8" filter="drop-shadow(0 0 2px #00b4d8)" />
                 </svg>
               </div>
             </div>
-            <div className="text-[8px] font-bold tracking-[0.15em] text-slate-500/90 dark:text-slate-400/80 uppercase mt-0.5 text-center w-full">
-              Real-Time Public Transport Tracking
+            <div className="text-[7.5px] font-black tracking-[0.2em] text-[#0a3161]/80 dark:text-cyan-400/80 uppercase mt-0.5 text-center w-full flex items-center justify-center gap-1.5">
+              <div className="w-1 h-1 rounded-full bg-[#0a3161] dark:bg-cyan-400 animate-pulse"></div>
+              GLOBAL TELEMETRY NODE
             </div>
           </div>
         </div>
@@ -66,10 +67,16 @@ export default function GovHeader({
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
+          {/* Helpline Indicator */}
+          <div className="hidden lg:flex items-center gap-2 text-[#0a3161] dark:text-[#a5f3fc] font-black text-[10px] bg-[#eff6ff] dark:bg-cyan-900/20 border border-[#bfdbfe] dark:border-cyan-800/50 px-3 py-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] uppercase tracking-widest rounded-sm">
+            <i className="fa-solid fa-phone text-[9px]"></i>
+            <span>Helpline: 1073</span>
+          </div>
+
           {/* Notifications Bell */}
           <button
             onClick={onOpenNotices}
-            className="relative p-2 text-gray-600 hover:text-[#0a3161] dark:text-gray-300 dark:hover:text-white bg-gray-50 hover:bg-gray-100 dark:bg-[#1a1d24] dark:hover:bg-[#20242e] border border-gray-300 dark:border-gray-700 rounded transition-colors focus:outline-none"
+            className="relative p-2 text-gray-600 hover:text-[#0a3161] dark:text-gray-300 dark:hover:text-cyan-400 bg-gray-50/50 hover:bg-gray-100 dark:bg-[#0b1221]/50 dark:hover:bg-[#0f172a] border border-gray-300/50 dark:border-blue-900/50 rounded transition-colors focus:outline-none backdrop-blur-md"
             title="Public Notices"
           >
             <Bell size={18} strokeWidth={2.5} />
@@ -106,11 +113,11 @@ export default function GovHeader({
 
           {/* Theme Toggle */}
           <button 
-            className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-2 rounded transition-colors font-medium text-[13px] text-gray-700 dark:text-gray-300"
+            className="flex items-center gap-2 hover:bg-slate-200/50 dark:hover:bg-blue-900/20 border border-transparent hover:border-slate-300 dark:hover:border-blue-800/50 px-3 py-1.5 rounded transition-all font-bold tracking-widest uppercase text-[10px] text-slate-700 dark:text-slate-300"
             onClick={onToggleTheme} 
             aria-label="Toggle theme"
           >
-            {themeLabel === "night" ? <Moon size={18} className="text-blue-400" /> : <Sun size={18} className="text-amber-500" />}
+            {themeLabel === "night" ? <Moon size={14} className="text-cyan-400 drop-shadow-[0_0_2px_rgba(34,211,238,0.8)]" /> : <Sun size={14} className="text-amber-500 drop-shadow-[0_0_2px_rgba(245,158,11,0.5)]" />}
             <span className="hidden sm:inline-block">{themeLabel === "night" ? t("app.night") : t("app.day")}</span>
           </button>
 
@@ -118,22 +125,22 @@ export default function GovHeader({
           {isAuthed ? (
             <>
               <button
-                className="flex items-center gap-2 text-rose-600 hover:text-white dark:text-rose-400 dark:hover:text-white bg-transparent hover:bg-rose-600 dark:hover:bg-rose-500 border border-transparent hover:border-rose-600 dark:hover:border-rose-500 px-3 py-2 rounded-none transition-colors font-semibold text-[13px]"
+                className="flex items-center gap-2 text-rose-600 hover:text-white dark:text-rose-400 dark:hover:text-white bg-transparent hover:bg-rose-600 dark:hover:bg-rose-500 border border-transparent hover:border-rose-600 dark:hover:border-rose-500 px-3 py-1.5 rounded-sm transition-colors font-bold tracking-widest uppercase text-[10px]"
                 onClick={async () => {
                   await logout();
                   nav("/welcome");
                 }}
               >
-                <LogOut size={18} />
+                <LogOut size={14} />
                 <span className="hidden sm:inline-block">Logout</span>
               </button>
             </>
           ) : (
             <Link 
-              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-5 py-2 rounded-none transition-colors font-semibold text-[13px] ml-2" 
+              className="flex items-center gap-2 bg-[#0a3161] hover:bg-[#072448] dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white px-4 py-1.5 rounded-sm shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] transition-all font-black tracking-widest uppercase text-[10px] ml-2" 
               to="/login"
             >
-              <LogIn size={16} strokeWidth={2.5} />
+              <LogIn size={14} strokeWidth={2.5} />
               <span className="hidden sm:inline-block">{t("app.login")}</span>
             </Link>
           )}
